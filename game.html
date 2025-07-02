@@ -108,17 +108,21 @@
         } else {
           frameX = 3;
         }
+        ctx.save();
+        ctx.translate(this.x + FRAME_WIDTH / 2, this.y + FRAME_HEIGHT / 2);
+        ctx.scale(1, -1);
         ctx.drawImage(
           sprite,
           SHEET_OFFSET_X + frameX * FRAME_WIDTH,
           SHEET_OFFSET_Y + ENEMY_OFFSET_Y + frameY * FRAME_HEIGHT,
           FRAME_WIDTH,
           FRAME_HEIGHT,
-          this.x - SPRITE_PADDING,
-          this.y - SPRITE_PADDING,
+          -FRAME_WIDTH / 2 - SPRITE_PADDING,
+          -FRAME_HEIGHT / 2 - SPRITE_PADDING,
           FRAME_WIDTH,
           FRAME_HEIGHT
         );
+        ctx.restore();
       }
     }
 
