@@ -18,11 +18,25 @@
 </head>
 <body>
   <canvas id="gameCanvas" width="640" height="360"></canvas>
-  <button id="resetBtn" style="display:none;position:absolute;left:50%;top:60%;transform:translate(-50%, -50%);padding:10px 20px;font-size:20px;">Restart</button>
+  <button id="resetBtn" style="display:none;position:absolute;left:50%;bottom:10px;transform:translateX(-50%);padding:10px 20px;font-size:20px;">Restart</button>
+  <div id="scoreContainer" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);color:white;text-align:center;font-family:Arial;">
+    <h2>High Scores</h2>
+    <ol id="highScoreList" style="list-style:none;padding:0;margin:0;"></ol>
+    <div id="nameEntry" style="margin-top:10px;display:none;">
+      <input id="nameInput" maxlength="24" value="Neph" style="padding:5px;" />
+      <button id="saveScoreBtn" style="padding:5px;">Save Score</button>
+    </div>
+  </div>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const resetBtn = document.getElementById("resetBtn");
+    const scoreContainer = document.getElementById("scoreContainer");
+    const highScoreList = document.getElementById("highScoreList");
+    const nameEntry = document.getElementById("nameEntry");
+    const nameInput = document.getElementById("nameInput");
+    const saveScoreBtn = document.getElementById("saveScoreBtn");
+    const MAX_HIGH_SCORES = 5;
 
     const gravity = 0.5;
     const groundY = 300;
@@ -162,6 +176,23 @@
 
     let enemies = [];
     let spawnTimer = 0;
+    function loadHighScores() {
+      return JSON.parse(localStorage.getItem("highScores") || "[]");
+    }
+
+    function saveHighScores(scores) {
+      localStorage.setItem("highScores", JSON.stringify(scores));
+    }
+
+    function renderHighScores() {
+      const scores = loadHighScores();
+      highScoreList.innerHTML = scores.map(s => `<li>${s.name}: ${s.score}</li>`).join("");
+    }
+
+    function qualifiesForHighScore(s) {
+      const scores = loadHighScores();
+      return scores.length < MAX_HIGH_SCORES || s > scores[scores.length - 1].score;
+    }
     function drawScore() {
       ctx.fillStyle = "white";
       ctx.font = "20px Arial";
@@ -175,10 +206,18 @@
     ctx.fillStyle = "white";
     ctx.font = "40px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+    ctx.fillText("Game Over", canvas.width / 2, 40);
     ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, canvas.width / 2, canvas.height / 2 + 40);
+    ctx.fillText("Score: " + score, canvas.width / 2, 80);
     resetBtn.style.display = "block";
+    scoreContainer.style.display = "block";
+    renderHighScores();
+    if (qualifiesForHighScore(score)) {
+      nameEntry.style.display = "block";
+      nameInput.value = "Neph";
+    } else {
+      nameEntry.style.display = "none";
+    }
   }
 
   function resetGame() {
@@ -194,6 +233,8 @@
     player.attacking = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     resetBtn.style.display = "none";
+    scoreContainer.style.display = "none";
+    nameEntry.style.display = "none";
     gameLoop();
   }
 
@@ -252,7 +293,17 @@
         }
       }
 
-    resetBtn.addEventListener("click", resetGame);
+  resetBtn.addEventListener("click", resetGame);
+  saveScoreBtn.addEventListener("click", () => {
+    const name = nameInput.value.substring(0, 24) || "Anonymous";
+    let scores = loadHighScores();
+    scores.push({ name, score });
+    scores.sort((a, b) => b.score - a.score);
+    scores = scores.slice(0, MAX_HIGH_SCORES);
+    saveHighScores(scores);
+    renderHighScores();
+    nameEntry.style.display = "none";
+  });
 
     sprite.onload = () => {
       gameLoop();
