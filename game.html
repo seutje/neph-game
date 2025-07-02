@@ -36,6 +36,7 @@
     const nameEntry = document.getElementById("nameEntry");
     const nameInput = document.getElementById("nameInput");
     const saveScoreBtn = document.getElementById("saveScoreBtn");
+    const MAX_HIGH_SCORES = 5;
 
     const gravity = 0.5;
     const groundY = 300;
@@ -190,7 +191,7 @@
 
     function qualifiesForHighScore(s) {
       const scores = loadHighScores();
-      return scores.length < 10 || s > scores[scores.length - 1].score;
+      return scores.length < MAX_HIGH_SCORES || s > scores[scores.length - 1].score;
     }
     function drawScore() {
       ctx.fillStyle = "white";
@@ -298,7 +299,7 @@
     let scores = loadHighScores();
     scores.push({ name, score });
     scores.sort((a, b) => b.score - a.score);
-    scores = scores.slice(0, 10);
+    scores = scores.slice(0, MAX_HIGH_SCORES);
     saveHighScores(scores);
     renderHighScores();
     nameEntry.style.display = "none";
