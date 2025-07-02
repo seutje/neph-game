@@ -34,6 +34,7 @@
     const SPRITE_PADDING = 19;
     const SHEET_OFFSET_X = 23;
     const SHEET_OFFSET_Y = 18;
+    const HITBOX_SCALE = 0.7;
     const ENEMY_OFFSET_Y = 16;
     let score = 0;
     let gameOver = false;
@@ -197,16 +198,16 @@
           if (
             player.attacking &&
             e.state === "walk" &&
-            Math.abs(player.x - e.x) < FRAME_WIDTH &&
-            Math.abs(player.y - e.y) < FRAME_HEIGHT
+            Math.abs(player.x - e.x) < (FRAME_WIDTH - SPRITE_PADDING) * HITBOX_SCALE &&
+            Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE
           ) {
             e.state = "hit";
             score += 1;
           } else if (
             !player.attacking &&
             e.state === "walk" &&
-            Math.abs(player.x - e.x) < FRAME_WIDTH &&
-            Math.abs(player.y - e.y) < FRAME_HEIGHT
+            Math.abs(player.x - e.x) < (FRAME_WIDTH - SPRITE_PADDING) * HITBOX_SCALE &&
+            Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE
           ) {
             gameOver = true;
           }
