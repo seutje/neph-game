@@ -280,14 +280,14 @@
       return scores.length < MAX_HIGH_SCORES || s > scores[scores.length - 1].score;
     }
     function drawScore() {
-      ctx.fillStyle = "white";
+      ctx.fillStyle = "black";
       ctx.font = "20px Arial";
       ctx.textAlign = "left";
       ctx.fillText("Score: " + score, 10, 20);
     }
 
     function drawHealth() {
-      ctx.fillStyle = "white";
+      ctx.fillStyle = "black";
       ctx.font = "20px Arial";
       ctx.textAlign = "right";
       ctx.fillText("Health: " + health, canvas.width - 10, 20);
