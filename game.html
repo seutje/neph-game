@@ -137,17 +137,18 @@
           this.frame = 3;
         }
           if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
-          ctx.drawImage(
-            sprite,
-            SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
-            SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
-            FRAME_WIDTH,
-            FRAME_HEIGHT,
-            this.x - SPRITE_PADDING,
-            this.y - SPRITE_PADDING,
-            FRAME_WIDTH,
-            FRAME_HEIGHT
-          );
+            const yOffset = frameY === 0 ? 6 : 0;
+            ctx.drawImage(
+              sprite,
+              SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
+              SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
+              FRAME_WIDTH,
+              FRAME_HEIGHT,
+              this.x - SPRITE_PADDING,
+              this.y - SPRITE_PADDING + yOffset,
+              FRAME_WIDTH,
+              FRAME_HEIGHT
+            );
           }
           if (DEBUG) {
             ctx.strokeStyle = "lime";
