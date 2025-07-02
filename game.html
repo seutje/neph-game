@@ -52,6 +52,7 @@
     const ENEMY_OFFSET_Y = 16;
     const DEBUG = false;
     let score = 0;
+    let health = 3;
     let gameOver = false;
     let animationId;
 
@@ -129,6 +130,10 @@
           this.invincibility = 60;
           this.vy = -8;
           this.jumping = true;
+          health--;
+          if (health < 1) {
+            gameOver = true;
+          }
         }
       },
     };
@@ -232,6 +237,13 @@
       ctx.fillText("Score: " + score, 10, 20);
     }
 
+    function drawHealth() {
+      ctx.fillStyle = "white";
+      ctx.font = "20px Arial";
+      ctx.textAlign = "right";
+      ctx.fillText("Health: " + health, canvas.width - 10, 20);
+    }
+
   function showGameOver() {
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -254,6 +266,7 @@
 
   function resetGame() {
     score = 0;
+    health = 3;
     gameOver = false;
     enemies = [];
     spawnTimer = 0;
@@ -320,6 +333,7 @@
           enemies = enemies.filter(e => e.state !== "remove");
 
         drawScore();
+        drawHealth();
 
         if (!gameOver) {
           animationId = requestAnimationFrame(gameLoop);
