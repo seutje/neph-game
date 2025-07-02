@@ -36,6 +36,7 @@
     const SHEET_OFFSET_Y = 18;
     const HITBOX_SCALE = 0.7;
     const ENEMY_OFFSET_Y = 16;
+    const DEBUG = false;
     let score = 0;
     let gameOver = false;
     let animationId;
@@ -86,6 +87,15 @@
             FRAME_WIDTH,
             FRAME_HEIGHT
           );
+          if (DEBUG) {
+            ctx.strokeStyle = "lime";
+            ctx.strokeRect(
+              this.x - SPRITE_PADDING,
+              this.y - SPRITE_PADDING,
+              FRAME_WIDTH,
+              FRAME_HEIGHT
+            );
+          }
       }
     };
 
@@ -130,6 +140,15 @@
           FRAME_WIDTH,
           FRAME_HEIGHT
         );
+        if (DEBUG) {
+          ctx.strokeStyle = "lime";
+          ctx.strokeRect(
+            -FRAME_WIDTH / 2 - SPRITE_PADDING,
+            -FRAME_HEIGHT / 2 - SPRITE_PADDING,
+            FRAME_WIDTH,
+            FRAME_HEIGHT
+          );
+        }
         ctx.restore();
       }
     }
