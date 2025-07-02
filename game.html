@@ -55,6 +55,7 @@
     let gameOver = false;
     let animationId;
 
+    let frameCount = 0;
     const player = {
       x: 50,
       y: groundY,
@@ -66,7 +67,15 @@
       direction: 1,
       jumping: false,
       attacking: false,
+      invincible: false,
+      invincibility: 0,
       update() {
+        if (this.invincible) {
+          this.invincibility--;
+          if (this.invincibility <= 0) {
+            this.invincible = false;
+          }
+        }
         this.vy += gravity;
         this.y += this.vy;
         if (this.y >= groundY) {
@@ -91,6 +100,7 @@
           frameY = 1;
           this.frame = 3;
         }
+          if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
           ctx.drawImage(
             sprite,
             SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
@@ -102,6 +112,7 @@
             FRAME_WIDTH,
             FRAME_HEIGHT
           );
+          }
           if (DEBUG) {
             ctx.strokeStyle = "lime";
             ctx.strokeRect(
@@ -112,6 +123,14 @@
             );
           }
       }
+      hit() {
+        if (!this.invincible) {
+          this.invincible = true;
+          this.invincibility = 60;
+          this.vy = -8;
+          this.jumping = true;
+        }
+      },
     };
 
       class Enemy {
@@ -253,6 +272,7 @@
 
 
     function gameLoop() {
+      frameCount++;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       player.vx = 0;
@@ -280,9 +300,10 @@
             !player.attacking &&
             e.state === "walk" &&
             Math.abs(player.x - e.x) < (FRAME_WIDTH - ((SPRITE_PADDING + 13) * 2)) * HITBOX_SCALE &&
-            Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE
+            Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE &&
+            !player.invincible
           ) {
-            gameOver = true;
+            player.hit();
           }
         });
 
