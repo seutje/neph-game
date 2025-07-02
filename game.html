@@ -79,12 +79,21 @@
         }
         this.vy += gravity;
         this.y += this.vy;
+        if (this.y < 0) {
+          this.y = 0;
+          this.vy = 0;
+        }
         if (this.y >= groundY) {
           this.y = groundY;
           this.vy = 0;
           this.jumping = false;
         }
         this.x += this.vx;
+        if (this.x < 0) {
+          this.x = 0;
+        } else if (this.x + this.width > canvas.width) {
+          this.x = canvas.width - this.width;
+        }
       },
       draw() {
         let frameY = 0;
