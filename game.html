@@ -29,6 +29,7 @@
     const SPRITE_PADDING = 12;
     const SHEET_OFFSET_X = 26;
     const SHEET_OFFSET_Y = 19;
+    const ENEMY_OFFSET_Y = 24;
 
 
     const player = {
@@ -110,7 +111,7 @@
         ctx.drawImage(
           sprite,
           SHEET_OFFSET_X + frameX * FRAME_WIDTH,
-          SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
+          SHEET_OFFSET_Y + ENEMY_OFFSET_Y + frameY * FRAME_HEIGHT,
           FRAME_WIDTH,
           FRAME_HEIGHT,
           this.x - SPRITE_PADDING,
