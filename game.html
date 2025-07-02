@@ -143,12 +143,25 @@
           this.x = x;
           this.y = groundY;
           this.vx = -1.5;
+          this.vy = 0;
+          this.jumping = false;
           this.frame = 0;
           this.state = "walk";
           this.deathTime = null; // time when the enemy entered the dead state
         }
         update() {
           if (this.state === "walk") {
+            if (!this.jumping && Math.random() < 0.01) {
+              this.vy = -10;
+              this.jumping = true;
+            }
+            this.vy += gravity;
+            this.y += this.vy;
+            if (this.y >= groundY) {
+              this.y = groundY;
+              this.vy = 0;
+              this.jumping = false;
+            }
             this.x += this.vx;
             this.frame = (this.frame + 0.1) % 2;
           } else if (this.state === "hit") {
