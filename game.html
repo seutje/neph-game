@@ -57,6 +57,32 @@
     let animationId;
 
     let frameCount = 0;
+
+    function rectsOverlap(a, b) {
+      return (
+        a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height > b.y
+      );
+    }
+
+    function collisionSide(a, b) {
+      const dx = a.x + a.width / 2 - (b.x + b.width / 2);
+      const dy = a.y + a.height / 2 - (b.y + b.height / 2);
+      const width = (a.width + b.width) / 2;
+      const height = (a.height + b.height) / 2;
+      if (Math.abs(dx) <= width && Math.abs(dy) <= height) {
+        const wy = width * dy;
+        const hx = height * dx;
+        if (wy > hx) {
+          return wy > -hx ? "top" : "left";
+        } else {
+          return wy > -hx ? "right" : "bottom";
+        }
+      }
+      return null;
+    }
     const player = {
       x: 50,
       y: groundY,
@@ -323,22 +349,26 @@
       enemies.forEach(e => e.update());
 
         enemies.forEach(e => {
-          if (
-            player.attacking &&
-            e.state === "walk" &&
-            Math.abs(player.x - e.x) < (FRAME_WIDTH - (SPRITE_PADDING * 2)) * HITBOX_SCALE &&
-            Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE
-          ) {
-            e.state = "hit";
-            score += 1;
-          } else if (
-            !player.attacking &&
-            e.state === "walk" &&
-            Math.abs(player.x - e.x) < (FRAME_WIDTH - ((SPRITE_PADDING + 13) * 2)) * HITBOX_SCALE &&
-            Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE &&
-            !player.invincible
-          ) {
-            player.hit();
+          const playerBox = {
+            x: player.x,
+            y: player.y,
+            width: FRAME_WIDTH - SPRITE_PADDING * 3,
+            height: FRAME_HEIGHT - SPRITE_PADDING * 3,
+          };
+          const enemyBox = {
+            x: e.x,
+            y: e.y,
+            width: FRAME_WIDTH - SPRITE_PADDING * 3,
+            height: FRAME_HEIGHT - SPRITE_PADDING * 3,
+          };
+          if (rectsOverlap(playerBox, enemyBox)) {
+            const side = collisionSide(playerBox, enemyBox);
+            if (player.attacking && e.state === "walk") {
+              e.state = "hit";
+              score += 1;
+            } else if (!player.attacking && e.state === "walk" && !player.invincible) {
+              player.hit();
+            }
           }
         });
 
