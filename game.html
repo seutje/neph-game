@@ -350,16 +350,16 @@
 
         enemies.forEach(e => {
           const playerBox = {
-            x: player.x - SPRITE_PADDING,
-            y: player.y - SPRITE_PADDING,
-            width: FRAME_WIDTH,
-            height: FRAME_HEIGHT,
+            x: player.x,
+            y: player.y,
+            width: FRAME_WIDTH - SPRITE_PADDING * 2,
+            height: FRAME_HEIGHT - SPRITE_PADDING * 2,
           };
           const enemyBox = {
-            x: e.x - SPRITE_PADDING,
-            y: e.y - SPRITE_PADDING,
-            width: FRAME_WIDTH,
-            height: FRAME_HEIGHT,
+            x: e.x,
+            y: e.y,
+            width: FRAME_WIDTH - SPRITE_PADDING * 2,
+            height: FRAME_HEIGHT - SPRITE_PADDING * 2,
           };
           if (rectsOverlap(playerBox, enemyBox)) {
             const side = collisionSide(playerBox, enemyBox);
