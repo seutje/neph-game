@@ -217,7 +217,7 @@
           if (
             player.attacking &&
             e.state === "walk" &&
-            Math.abs(player.x - e.x) < (FRAME_WIDTH - SPRITE_PADDING) * HITBOX_SCALE &&
+            Math.abs(player.x - e.x) < (FRAME_WIDTH - (SPRITE_PADDING * 2)) * HITBOX_SCALE &&
             Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE
           ) {
             e.state = "hit";
@@ -225,7 +225,7 @@
           } else if (
             !player.attacking &&
             e.state === "walk" &&
-            Math.abs(player.x - e.x) < (FRAME_WIDTH - SPRITE_PADDING) * HITBOX_SCALE &&
+            Math.abs(player.x - e.x) < (FRAME_WIDTH - ((SPRITE_PADDING + 13) * 2)) * HITBOX_SCALE &&
             Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE
           ) {
             gameOver = true;
