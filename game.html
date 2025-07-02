@@ -137,7 +137,7 @@
           this.frame = 3;
         }
           if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
-            const yOffset = frameY === 0 ? 4 : 0;
+            const yOffset = frameY === 0 ? 6 : 0;
             ctx.drawImage(
               sprite,
               SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
