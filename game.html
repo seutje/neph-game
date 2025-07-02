@@ -18,8 +18,8 @@
 </head>
 <body>
   <canvas id="gameCanvas" width="640" height="360"></canvas>
-  <button id="resetBtn" style="display:none;position:absolute;left:50%;top:60%;transform:translate(-50%, -50%);padding:10px 20px;font-size:20px;">Restart</button>
-  <div id="scoreContainer" style="display:none;position:absolute;left:50%;top:20%;transform:translate(-50%,0);color:white;text-align:center;font-family:Arial;">
+  <button id="resetBtn" style="display:none;position:absolute;left:50%;bottom:10px;transform:translateX(-50%);padding:10px 20px;font-size:20px;">Restart</button>
+  <div id="scoreContainer" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);color:white;text-align:center;font-family:Arial;">
     <h2>High Scores</h2>
     <ol id="highScoreList" style="list-style:none;padding:0;margin:0;"></ol>
     <div id="nameEntry" style="margin-top:10px;display:none;">
@@ -205,9 +205,9 @@
     ctx.fillStyle = "white";
     ctx.font = "40px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+    ctx.fillText("Game Over", canvas.width / 2, 40);
     ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, canvas.width / 2, canvas.height / 2 + 40);
+    ctx.fillText("Score: " + score, canvas.width / 2, 80);
     resetBtn.style.display = "block";
     scoreContainer.style.display = "block";
     renderHighScores();
