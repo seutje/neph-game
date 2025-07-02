@@ -52,9 +52,11 @@
     const ENEMY_OFFSET_Y = 16;
     const DEBUG = false;
     let score = 0;
+    let health = 3;
     let gameOver = false;
     let animationId;
 
+    let frameCount = 0;
     const player = {
       x: 50,
       y: groundY,
@@ -66,7 +68,15 @@
       direction: 1,
       jumping: false,
       attacking: false,
+      invincible: false,
+      invincibility: 0,
       update() {
+        if (this.invincible) {
+          this.invincibility--;
+          if (this.invincibility <= 0) {
+            this.invincible = false;
+          }
+        }
         this.vy += gravity;
         this.y += this.vy;
         if (this.y >= groundY) {
@@ -91,6 +101,7 @@
           frameY = 1;
           this.frame = 3;
         }
+          if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
           ctx.drawImage(
             sprite,
             SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
@@ -102,6 +113,7 @@
             FRAME_WIDTH,
             FRAME_HEIGHT
           );
+          }
           if (DEBUG) {
             ctx.strokeStyle = "lime";
             ctx.strokeRect(
@@ -111,7 +123,19 @@
               FRAME_HEIGHT
             );
           }
-      }
+      },
+      hit() {
+        if (!this.invincible) {
+          this.invincible = true;
+          this.invincibility = 60;
+          this.vy = -8;
+          this.jumping = true;
+          health--;
+          if (health < 1) {
+            gameOver = true;
+          }
+        }
+      },
     };
 
       class Enemy {
@@ -213,6 +237,13 @@
       ctx.fillText("Score: " + score, 10, 20);
     }
 
+    function drawHealth() {
+      ctx.fillStyle = "white";
+      ctx.font = "20px Arial";
+      ctx.textAlign = "right";
+      ctx.fillText("Health: " + health, canvas.width - 10, 20);
+    }
+
   function showGameOver() {
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -235,6 +266,7 @@
 
   function resetGame() {
     score = 0;
+    health = 3;
     gameOver = false;
     enemies = [];
     spawnTimer = 0;
@@ -253,6 +285,7 @@
 
 
     function gameLoop() {
+      frameCount++;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       player.vx = 0;
@@ -280,9 +313,10 @@
             !player.attacking &&
             e.state === "walk" &&
             Math.abs(player.x - e.x) < (FRAME_WIDTH - ((SPRITE_PADDING + 13) * 2)) * HITBOX_SCALE &&
-            Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE
+            Math.abs(player.y - e.y) < FRAME_HEIGHT * HITBOX_SCALE &&
+            !player.invincible
           ) {
-            gameOver = true;
+            player.hit();
           }
         });
 
@@ -299,6 +333,7 @@
           enemies = enemies.filter(e => e.state !== "remove");
 
         drawScore();
+        drawHealth();
 
         if (!gameOver) {
           animationId = requestAnimationFrame(gameLoop);
