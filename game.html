@@ -352,14 +352,14 @@
           const playerBox = {
             x: player.x,
             y: player.y,
-            width: FRAME_WIDTH - SPRITE_PADDING * 2,
-            height: FRAME_HEIGHT - SPRITE_PADDING * 2,
+            width: FRAME_WIDTH - SPRITE_PADDING * 3,
+            height: FRAME_HEIGHT - SPRITE_PADDING * 3,
           };
           const enemyBox = {
             x: e.x,
             y: e.y,
-            width: FRAME_WIDTH - SPRITE_PADDING * 2,
-            height: FRAME_HEIGHT - SPRITE_PADDING * 2,
+            width: FRAME_WIDTH - SPRITE_PADDING * 3,
+            height: FRAME_HEIGHT - SPRITE_PADDING * 3,
           };
           if (rectsOverlap(playerBox, enemyBox)) {
             const side = collisionSide(playerBox, enemyBox);
