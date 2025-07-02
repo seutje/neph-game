@@ -113,23 +113,35 @@
       }
     };
 
-    class Enemy {
-      constructor(x) {
-        this.x = x;
-        this.y = groundY;
-        this.vx = -1.5;
-        this.frame = 0;
-        this.state = "walk";
-      }
-      update() {
-        if (this.state === "walk") {
-          this.x += this.vx;
-          this.frame = (this.frame + 0.1) % 2;
-        } else if (this.state === "hit") {
-          this.frame = 2;
-          setTimeout(() => this.state = "dead", 500);
+      class Enemy {
+        constructor(x) {
+          this.x = x;
+          this.y = groundY;
+          this.vx = -1.5;
+          this.frame = 0;
+          this.state = "walk";
+          this.deathTime = null; // time when the enemy entered the dead state
         }
-      }
+        update() {
+          if (this.state === "walk") {
+            this.x += this.vx;
+            this.frame = (this.frame + 0.1) % 2;
+          } else if (this.state === "hit") {
+            this.frame = 2;
+            if (!this.deathTimeout) {
+              // transition to dead after short hit reaction
+              this.deathTimeout = setTimeout(() => {
+                this.state = "dead";
+                this.deathTime = Date.now();
+              }, 500);
+            }
+          } else if (this.state === "dead") {
+            // remain on the final frame for 0.3s
+            if (Date.now() - this.deathTime >= 300) {
+              this.state = "remove";
+            }
+          }
+        }
       draw() {
         let frameY = 2;
         let frameX = 0;
@@ -280,9 +292,10 @@
       }
 
       player.draw();
-      enemies.forEach(e => e.draw());
+        enemies.forEach(e => e.draw());
 
-        enemies = enemies.filter(e => e.state !== "dead");
+          // remove enemies after their death animation has finished
+          enemies = enemies.filter(e => e.state !== "remove");
 
         drawScore();
 
