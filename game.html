@@ -27,6 +27,8 @@
     const FRAME_WIDTH = 64;
     const FRAME_HEIGHT = 85;
     const SPRITE_PADDING = 12;
+    const SHEET_OFFSET_X = 12;
+    const SHEET_OFFSET_Y = 12;
 
 
     const player = {
@@ -64,17 +66,17 @@
         } else {
           this.frame = 0;
         }
-        ctx.drawImage(
-          sprite,
-          Math.floor(this.frame) * FRAME_WIDTH,
-          frameY * FRAME_HEIGHT,
-          FRAME_WIDTH,
-          FRAME_HEIGHT,
-          this.x - SPRITE_PADDING,
-          this.y - SPRITE_PADDING,
-          FRAME_WIDTH,
-          FRAME_HEIGHT
-        );
+          ctx.drawImage(
+            sprite,
+            SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
+            SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
+            FRAME_WIDTH,
+            FRAME_HEIGHT,
+            this.x - SPRITE_PADDING,
+            this.y - SPRITE_PADDING,
+            FRAME_WIDTH,
+            FRAME_HEIGHT
+          );
       }
     };
 
@@ -105,7 +107,17 @@
         } else {
           frameX = 3;
         }
-        ctx.drawImage(sprite, frameX * FRAME_WIDTH, frameY * FRAME_HEIGHT, FRAME_WIDTH, FRAME_HEIGHT, this.x - SPRITE_PADDING, this.y - SPRITE_PADDING, FRAME_WIDTH, FRAME_HEIGHT);
+        ctx.drawImage(
+          sprite,
+          SHEET_OFFSET_X + frameX * FRAME_WIDTH,
+          SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
+          FRAME_WIDTH,
+          FRAME_HEIGHT,
+          this.x - SPRITE_PADDING,
+          this.y - SPRITE_PADDING,
+          FRAME_WIDTH,
+          FRAME_HEIGHT
+        );
       }
     }
 
