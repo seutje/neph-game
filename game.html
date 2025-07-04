@@ -75,6 +75,8 @@
     const HITBOX_SCALE = 0.7;
     const ENEMY_OFFSET_Y = 3;
     const DEBUG = false;
+    const ATTACK_DURATION_FRAMES = 12; // 0.2s at 60fps
+    const ATTACK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
     let score = 0;
     let health = 3;
     let gameOver = false;
@@ -120,14 +122,31 @@
       direction: 1,
       jumping: false,
       attacking: false,
+      attackTimer: 0,
+      cooldown: 0,
       invincible: false,
       invincibility: 0,
+      attack() {
+        if (!this.attacking && this.cooldown <= 0) {
+          this.attacking = true;
+          this.attackTimer = ATTACK_DURATION_FRAMES;
+        }
+      },
       update() {
         if (this.invincible) {
           this.invincibility--;
           if (this.invincibility <= 0) {
             this.invincible = false;
           }
+        }
+        if (this.attacking) {
+          this.attackTimer--;
+          if (this.attackTimer <= 0) {
+            this.attacking = false;
+            this.cooldown = ATTACK_COOLDOWN_FRAMES;
+          }
+        } else if (this.cooldown > 0) {
+          this.cooldown--;
         }
         this.vy += gravity;
         this.y += this.vy;
@@ -298,11 +317,11 @@
         }
       } else {
         keys[e.key] = true;
+        if (e.key === " ") player.attack();
       }
     });
     document.addEventListener("keyup", e => {
       keys[e.key] = false;
-      if (e.key === " ") player.attacking = false;
     });
 
     let enemies = [];
@@ -405,6 +424,8 @@ function drawHealth() {
     player.vy = 0;
     player.jumping = false;
     player.attacking = false;
+    player.attackTimer = 0;
+    player.cooldown = 0;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     resetBtn.style.display = "none";
     scoreContainer.style.display = "none";
@@ -440,7 +461,6 @@ function drawHealth() {
         player.vy = -10;
         player.jumping = true;
       }
-      if (keys[" "]) player.attacking = true;
 
       player.update();
       enemies.forEach(e => e.update());
