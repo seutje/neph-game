@@ -21,6 +21,7 @@
     <h2>Select Your Character</h2>
     <button id="selectNeph" style="padding:10px 20px;font-size:20px;">Neph</button>
     <button id="selectTurf" style="padding:10px 20px;font-size:20px;">Turf</button>
+    <button id="selectSeuge" style="padding:10px 20px;font-size:20px;">Seuge</button>
   </div>
   <canvas id="gameCanvas" width="640" height="360" style="display:none;"></canvas>
   <button id="resetBtn" style="display:none;position:absolute;left:50%;bottom:10px;transform:translateX(-50%);padding:10px 20px;font-size:20px;">Restart</button>
@@ -46,6 +47,7 @@
     const characterSelectionDiv = document.getElementById("characterSelection");
     const selectNephBtn = document.getElementById("selectNeph");
     const selectTurfBtn = document.getElementById("selectTurf");
+    const selectSeugeBtn = document.getElementById("selectSeuge");
     let selectedCharacter = "Neph";
     const MAX_HIGH_SCORES = 5;
 
@@ -416,11 +418,7 @@ function drawHealth() {
 
   function startGame(character) {
     selectedCharacter = character;
-    if (character === "Neph") {
-      sprite.src = "sprite-neph.png";
-    } else {
-      sprite.src = "sprite-turf.png";
-    }
+    sprite.src = `sprite-${character.toLowerCase()}.png`;
     characterSelectionDiv.style.display = "none";
     canvas.style.display = "block";
   }
@@ -507,6 +505,7 @@ function drawHealth() {
 
   selectNephBtn.addEventListener("click", () => startGame("Neph"));
   selectTurfBtn.addEventListener("click", () => startGame("Turf"));
+  selectSeugeBtn.addEventListener("click", () => startGame("Seuge"));
 
   sprite.onload = () => {
     initGame();
