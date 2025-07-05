@@ -322,8 +322,10 @@ document.addEventListener("keydown", e => {
       }
     }
   } else {
+    if (e.key === " " && !keys[e.key]) {
+      player.attack();
+    }
     keys[e.key] = true;
-    if (e.key === " ") player.attack();
   }
 });
 document.addEventListener("keyup", e => {
