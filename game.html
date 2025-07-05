@@ -19,10 +19,14 @@
   </div>
   <canvas id="gameCanvas" width="640" height="360"></canvas>
   <div id="volumeControl">
-    <span id="sfxIcon">🔊</span>
-    <input type="range" id="sfxVolumeSlider" min="0" max="0.1" step="0.005" value="0.01" />
-    <span id="musicIcon">🎵</span>
-    <input type="range" id="musicVolumeSlider" min="0" max="0.1" step="0.005" value="0.01" />
+    <div class="volumeRow">
+      <span id="sfxIcon">🔊</span>
+      <input type="range" id="sfxVolumeSlider" min="0" max="0.1" step="0.005" value="0.01" />
+    </div>
+    <div class="volumeRow">
+      <span id="musicIcon">🎵</span>
+      <input type="range" id="musicVolumeSlider" min="0" max="0.1" step="0.005" value="0.01" />
+    </div>
   </div>
   <button id="resetBtn">Restart</button>
   <div id="scoreContainer">
