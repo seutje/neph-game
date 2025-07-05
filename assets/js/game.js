@@ -120,6 +120,7 @@ const player = {
   direction: 1,
   jumping: false,
   attacking: false,
+  blocking: false,
   attackTimer: 0,
   cooldown: 0,
   invincible: false,
@@ -172,12 +173,15 @@ const player = {
     } else if (this.jumping) {
       frameY = 0;
       this.frame = 2;
+    } else if (this.blocking) {
+      frameY = 1;
+      this.frame = 3;
     } else if (this.vx !== 0) {
       frameY = 0;
       this.frame = (this.frame + 0.1) % 3;
     } else {
       frameY = 1;
-      this.frame = 3;
+      this.frame = 0;
     }
     if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
       const yOffset = frameY === 0 ? 6 : 0;
@@ -204,7 +208,7 @@ const player = {
     }
   },
   hit() {
-    if (!this.invincible) {
+    if (!this.invincible && !this.blocking) {
       this.invincible = true;
       this.invincibility = 60;
       this.vy = -8;
@@ -460,11 +464,16 @@ function gameLoop() {
   drawGround();
 
   player.vx = 0;
-  if (keys["ArrowLeft"]) player.vx = -2;
-  if (keys["ArrowRight"]) player.vx = 2;
-  if (keys["ArrowUp"] && !player.jumping) {
-    player.vy = -10;
-    player.jumping = true;
+  if (keys["ArrowDown"]) {
+    player.blocking = true;
+  } else {
+    player.blocking = false;
+    if (keys["ArrowLeft"]) player.vx = -2;
+    if (keys["ArrowRight"]) player.vx = 2;
+    if (keys["ArrowUp"] && !player.jumping) {
+      player.vy = -10;
+      player.jumping = true;
+    }
   }
 
   player.update();
