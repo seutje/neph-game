@@ -675,7 +675,7 @@ function gameLoop() {
 
   const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
   worldSpeed = BASE_WORLD_SPEED * (1 + WORLD_SPEED_INCREMENT * elapsedSeconds);
-  if (player.x > canvas.width * 0.6 && player.vx > 0) {
+  if (player.x > canvas.width * 0.5 && player.vx > 0) {
     worldSpeed -= player.vx;
   }
 
