@@ -55,6 +55,24 @@ let frameCount = 0;
 let gameStartTime = Date.now();
 let totalPausedTime = 0;
 let pauseStartTime = 0;
+let enemyKillCount = 0;
+let healthPacks = [];
+
+class HealthPack {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.radius = 10;
+    this.createdAt = Date.now();
+  }
+
+  draw() {
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
 
 function rectsOverlap(a, b) {
   return (
@@ -391,6 +409,8 @@ function initGame() {
   gameOver = false;
   enemies = [];
   spawnTimer = 0;
+  enemyKillCount = 0;
+  healthPacks = [];
   gameStartTime = Date.now();
   totalPausedTime = 0;
   player.x = 50;
@@ -458,6 +478,10 @@ function gameLoop() {
       if (player.attacking && e.state === "walk") {
         e.state = "hit";
         score += 1;
+        enemyKillCount++;
+        if (enemyKillCount % 3 === 0) {
+          healthPacks.push(new HealthPack(e.x, e.y));
+        }
       } else if (!player.attacking && e.state === "walk" && !player.invincible) {
         player.hit();
       }
@@ -475,9 +499,34 @@ function gameLoop() {
 
   player.draw();
   enemies.forEach(e => e.draw());
+  healthPacks.forEach(hp => hp.draw());
 
   // remove enemies after their death animation has finished
   enemies = enemies.filter(e => e.state !== "remove");
+
+  // Update and filter health packs
+  const now = Date.now();
+  healthPacks = healthPacks.filter(hp => {
+    const playerBox = {
+      x: player.x,
+      y: player.y,
+      width: player.width,
+      height: player.height,
+    };
+    const packBox = {
+      x: hp.x - hp.radius,
+      y: hp.y - hp.radius,
+      width: hp.radius * 2,
+      height: hp.radius * 2,
+    };
+
+    if (rectsOverlap(playerBox, packBox)) {
+      health++;
+      return false; // Remove pack
+    }
+
+    return now - hp.createdAt < 500; // Keep pack if less than 0.5s old
+  });
 
   drawScore();
   drawHealth();
