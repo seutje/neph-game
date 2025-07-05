@@ -44,6 +44,10 @@ const DEBUG = false;
 let terrainBlocks = [];
 const TERRAIN_BLOCK_WIDTH = canvas.width;
 const TERRAIN_BLOCK_HEIGHT = canvas.height - (groundY - SPRITE_PADDING + FRAME_HEIGHT);
+let gaps = [];
+let terrainCursor = 0;
+const GAP_CHANCE = 0.05;
+const MAX_GAP_WIDTH = 100;
 const clouds = [
   { x: 100, y: 60 },
   { x: 300, y: 80 },
@@ -180,9 +184,16 @@ const player = {
       this.vy = 0;
     }
     if (this.y >= groundY) {
-      this.y = groundY;
-      this.vy = 0;
-      this.jumping = false;
+      const centerX = this.x + this.width / 2;
+      const overGap = gaps.some(g => centerX >= g.x && centerX <= g.x + g.width);
+      if (!overGap) {
+        this.y = groundY;
+        this.vy = 0;
+        this.jumping = false;
+      }
+    }
+    if (this.y > canvas.height) {
+      gameOver = true;
     }
     this.x += this.vx + worldSpeed;
     if (this.x < 0) {
@@ -415,19 +426,38 @@ function drawClouds() {
   });
 }
 
+function generateGaps() {
+  while (terrainCursor < canvas.width * 3) {
+    if (Math.random() < GAP_CHANCE) {
+      const width = 40 + Math.random() * (MAX_GAP_WIDTH - 40);
+      gaps.push({ x: terrainCursor, width });
+      terrainCursor += width;
+    } else {
+      const groundWidth = 50 + Math.random() * 150;
+      terrainCursor += groundWidth;
+    }
+  }
+}
+
 function initTerrain() {
   terrainBlocks = [];
+  gaps = [];
+  terrainCursor = canvas.width;
   let currentX = 0;
   while (currentX < canvas.width + TERRAIN_BLOCK_WIDTH) {
     terrainBlocks.push({ x: currentX, y: groundY - SPRITE_PADDING + FRAME_HEIGHT });
     currentX += TERRAIN_BLOCK_WIDTH;
   }
+  generateGaps();
 }
 
 function drawGround() {
   ctx.fillStyle = "green";
   terrainBlocks.forEach(block => {
     ctx.fillRect(block.x, block.y, TERRAIN_BLOCK_WIDTH, canvas.height - block.y);
+  });
+  gaps.forEach(gap => {
+    ctx.clearRect(gap.x, groundY, gap.width, canvas.height - groundY);
   });
 }
 
@@ -503,15 +533,21 @@ function updateTerrain() {
   terrainBlocks.forEach(block => {
     block.x += worldSpeed;
   });
+  gaps.forEach(gap => {
+    gap.x += worldSpeed;
+  });
+  terrainCursor += worldSpeed;
 
   // Remove off-screen blocks
   terrainBlocks = terrainBlocks.filter(block => block.x + TERRAIN_BLOCK_WIDTH > 0);
+  gaps = gaps.filter(gap => gap.x + gap.width > 0);
 
   // Generate new blocks off-screen
   const lastBlock = terrainBlocks[terrainBlocks.length - 1];
   if (!lastBlock || lastBlock.x < canvas.width) {
     terrainBlocks.push({ x: (lastBlock ? lastBlock.x : 0) + TERRAIN_BLOCK_WIDTH, y: groundY - SPRITE_PADDING + FRAME_HEIGHT });
   }
+  generateGaps();
 }
 
 function gameLoop() {
