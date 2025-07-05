@@ -561,6 +561,7 @@ function drawGround() {
 }
 
 function showGameOver() {
+  stopBackgroundMusic();
   playDeathSound();
   ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
