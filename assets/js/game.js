@@ -391,9 +391,16 @@ class Enemy {
       this.vy += gravity;
       this.y += this.vy;
       if (this.y >= groundY) {
-        this.y = groundY;
-        this.vy = 0;
-        this.jumping = false;
+        const centerX = this.x + FRAME_WIDTH / 2;
+        const overGap = gaps.some(g => centerX >= g.x && centerX <= g.x + g.width);
+        if (!overGap) {
+          this.y = groundY;
+          this.vy = 0;
+          this.jumping = false;
+        }
+      }
+      if (this.y > canvas.height) {
+        this.state = "remove";
       }
       const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
       const multiplier = 1 + ENEMY_SPEED_INCREMENT * elapsedSeconds;
