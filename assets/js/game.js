@@ -24,11 +24,8 @@ const spriteCache = {};
 const gravity = 0.5;
 const groundY = 250;
 const CLOUD_SPEED = 0.2;
-const clouds = [
-  { x: 100, y: 60 },
-  { x: 300, y: 80 },
-  { x: 500, y: 50 }
-];
+let worldSpeed = 0;
+const PLAYER_SPEED = 2;
 
 const BASE_ENEMY_SPEED = -1.5;
 const ENEMY_SPEED_INCREMENT = 8 / 60;
@@ -43,6 +40,15 @@ const SHEET_OFFSET_Y = 9;
 const HITBOX_SCALE = 0.7;
 const ENEMY_OFFSET_Y = 3;
 const DEBUG = false;
+
+let terrainBlocks = [];
+const TERRAIN_BLOCK_WIDTH = canvas.width;
+const TERRAIN_BLOCK_HEIGHT = canvas.height - (groundY - SPRITE_PADDING + FRAME_HEIGHT);
+const clouds = [
+  { x: 100, y: 60 },
+  { x: 300, y: 80 },
+  { x: 500, y: 50 }
+];
 const ATTACK_DURATION_FRAMES = 12; // 0.2s at 60fps
 const ATTACK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
 const BLOCK_DURATION_FRAMES = 30; // 0.5s at 60fps
@@ -178,7 +184,7 @@ const player = {
       this.vy = 0;
       this.jumping = false;
     }
-    this.x += this.vx;
+    this.x += this.vx + worldSpeed;
     if (this.x < 0) {
       this.x = 0;
     } else if (this.x + this.width > canvas.width) {
@@ -270,7 +276,7 @@ class Enemy {
       }
       const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
       const multiplier = 1 + ENEMY_SPEED_INCREMENT * elapsedSeconds;
-      this.vx = this.baseSpeed * multiplier;
+      this.vx = this.baseSpeed * multiplier + worldSpeed;
       this.x += this.vx;
       this.frame = (this.frame + 0.1) % 2;
     } else if (this.state === "hit") {
@@ -409,10 +415,20 @@ function drawClouds() {
   });
 }
 
+function initTerrain() {
+  terrainBlocks = [];
+  let currentX = 0;
+  while (currentX < canvas.width + TERRAIN_BLOCK_WIDTH) {
+    terrainBlocks.push({ x: currentX, y: groundY - SPRITE_PADDING + FRAME_HEIGHT });
+    currentX += TERRAIN_BLOCK_WIDTH;
+  }
+}
+
 function drawGround() {
-  const top = groundY - SPRITE_PADDING + FRAME_HEIGHT;
   ctx.fillStyle = "green";
-  ctx.fillRect(0, top, canvas.width, canvas.height - top);
+  terrainBlocks.forEach(block => {
+    ctx.fillRect(block.x, block.y, TERRAIN_BLOCK_WIDTH, canvas.height - block.y);
+  });
 }
 
 function showGameOver() {
@@ -460,6 +476,7 @@ function initGame() {
   player.attacking = false;
   player.attackTimer = 0;
   player.cooldown = 0;
+  initTerrain();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   resetBtn.style.display = "none";
   scoreContainer.style.display = "none";
@@ -481,23 +498,59 @@ function startGame(character) {
 }
 
 
+function updateTerrain() {
+  // Move existing blocks
+  terrainBlocks.forEach(block => {
+    block.x += worldSpeed;
+  });
+
+  // Remove off-screen blocks
+  terrainBlocks = terrainBlocks.filter(block => block.x + TERRAIN_BLOCK_WIDTH > 0);
+
+  // Generate new blocks off-screen
+  const lastBlock = terrainBlocks[terrainBlocks.length - 1];
+  if (!lastBlock || lastBlock.x < canvas.width) {
+    terrainBlocks.push({ x: (lastBlock ? lastBlock.x : 0) + TERRAIN_BLOCK_WIDTH, y: groundY - SPRITE_PADDING + FRAME_HEIGHT });
+  }
+}
+
 function gameLoop() {
   frameCount++;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   updateClouds();
   drawClouds();
-  drawGround();
 
-  player.vx = 0;
-  if (keys["ArrowLeft"]) player.vx = -2;
-  if (keys["ArrowRight"]) player.vx = 2;
+  worldSpeed = 0;
+  if (player.x > canvas.width * 0.6 && player.vx > 0) {
+    worldSpeed = -player.vx;
+    player.x = canvas.width * 0.6;
+  }
+
+  if (keys["ArrowLeft"]) {
+    player.vx = -PLAYER_SPEED;
+  } else if (keys["ArrowRight"]) {
+    player.vx = PLAYER_SPEED;
+  } else {
+    player.vx = 0;
+  }
+
   if (keys["ArrowUp"] && !player.jumping) {
     player.vy = -10;
     player.jumping = true;
   }
 
   player.update();
-  enemies.forEach(e => e.update());
+  enemies.forEach(e => {
+    e.x += worldSpeed;
+    e.update();
+  });
+  healthPacks.forEach(hp => {
+    hp.x += worldSpeed;
+    hp.update();
+  });
+
+  updateTerrain();
+  drawGround();
 
   enemies.forEach(e => {
     const playerBox = {
