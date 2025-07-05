@@ -18,6 +18,9 @@ const selectZeniaBtn = document.getElementById("selectZenia");
 let selectedCharacter = "Neph";
 const MAX_HIGH_SCORES = 5;
 
+const characters = ["Neph", "Turf", "Seuge", "Jerp", "Smonk", "Nitro", "Zenia"];
+const spriteCache = {};
+
 const gravity = 0.5;
 const groundY = 250;
 const CLOUD_SPEED = 0.2;
@@ -187,7 +190,9 @@ const player = {
 };
 
 class Enemy {
-  constructor(x) {
+  constructor(x, character) {
+    this.character = character;
+    this.sprite = spriteCache[character.toLowerCase()];
     this.x = x;
     this.y = groundY;
     this.baseSpeed = BASE_ENEMY_SPEED;
@@ -246,7 +251,7 @@ class Enemy {
     ctx.translate(this.x + FRAME_WIDTH / 2, this.y + FRAME_HEIGHT / 2);
     ctx.scale(-1, 1);
     ctx.drawImage(
-      sprite,
+      this.sprite,
       SHEET_OFFSET_X + frameX * FRAME_WIDTH,
       SHEET_OFFSET_Y + ENEMY_OFFSET_Y + frameY * FRAME_HEIGHT,
       FRAME_WIDTH,
@@ -463,7 +468,8 @@ function gameLoop() {
   const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
   const spawnInterval = BASE_SPAWN_INTERVAL / (1 + ENEMY_SPEED_INCREMENT * elapsedSeconds);
   if (spawnTimer > spawnInterval) {
-    enemies.push(new Enemy(canvas.width));
+    const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
+    enemies.push(new Enemy(canvas.width, randomCharacter));
     spawnTimer = 0;
   }
 
@@ -507,4 +513,19 @@ sprite.onload = () => {
   initGame();
 };
 
-showCharacterSelection();
+function preload() {
+  let loaded = 0;
+  for (const char of characters) {
+    const img = new Image();
+    img.src = `assets/images/sprite-${char.toLowerCase()}.png`;
+    img.onload = () => {
+      loaded++;
+      if (loaded === characters.length) {
+        showCharacterSelection();
+      }
+    };
+    spriteCache[char.toLowerCase()] = img;
+  }
+}
+
+preload();
