@@ -68,7 +68,17 @@ let paused = false;
 let audioCtx;
 let musicInterval;
 let musicVolume = 0.05;
-const musicNotes = [261.63, 329.63, 392.0, 523.25]; // C4, E4, G4, C5
+// 8-note chiptune loop: C4 D4 E4 F4 G4 A4 G4 E4
+const musicNotes = [
+  261.63, // C4
+  293.66, // D4
+  329.63, // E4
+  349.23, // F4
+  392.0,  // G4
+  440.0,  // A4
+  392.0,  // G4
+  329.63 // E4
+];
 
 function playNote(freq, duration = 0.3) {
   if (!audioCtx) return;
