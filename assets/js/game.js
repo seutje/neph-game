@@ -411,7 +411,7 @@ function showCharacterSelection() {
 
 function startGame(character) {
   selectedCharacter = character;
-  sprite.src = `sprite-${character.toLowerCase()}.png`;
+  sprite.src = `assets/images/sprite-${character.toLowerCase()}.png`;
   characterSelectionDiv.style.display = "none";
   canvas.style.display = "block";
 }
