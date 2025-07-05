@@ -15,7 +15,9 @@ const selectJerpBtn = document.getElementById("selectJerp");
 const selectSmonkBtn = document.getElementById("selectSmonk");
 const selectNitroBtn = document.getElementById("selectNitro");
 const selectZeniaBtn = document.getElementById("selectZenia");
-const volumeSlider = document.getElementById("volumeSlider");
+const volumeControl = document.getElementById("volumeControl");
+const sfxVolumeSlider = document.getElementById("sfxVolumeSlider");
+const musicVolumeSlider = document.getElementById("musicVolumeSlider");
 let selectedCharacter = "Neph";
 const MAX_HIGH_SCORES = 5;
 
@@ -68,6 +70,7 @@ let paused = false;
 let audioCtx;
 let musicInterval;
 let musicVolume = 0.01;
+let sfxVolume = 0.01;
 const musicNotes = [
   // set 1: original melody
   130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
@@ -87,13 +90,13 @@ const musicNotes = [
   164.82, 196.0, 220.0, 196.0, 174.62, 164.82, 146.83, 130.81
 ];
 
-function playNote(freq, duration = 0.3) {
+function playNote(freq, duration = 0.3, volume = musicVolume) {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = "square";
   osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-  gain.gain.setValueAtTime(musicVolume, audioCtx.currentTime);
+  gain.gain.setValueAtTime(volume, audioCtx.currentTime);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
   osc.start();
@@ -110,36 +113,36 @@ function startBackgroundMusic() {
   let idx = 0;
   clearInterval(musicInterval);
   musicInterval = setInterval(() => {
-    playNote(musicNotes[idx % musicNotes.length]);
+    playNote(musicNotes[idx % musicNotes.length], 0.3, musicVolume);
     idx++;
   }, 300);
 }
 
 function playJumpSound() {
   // quick up-beep
-  playNote(329.63, 0.1);
+  playNote(329.63, 0.1, sfxVolume);
 }
 
 function playAttackSound() {
   // short lower tone for attack
-  playNote(261.63, 0.1);
+  playNote(261.63, 0.1, sfxVolume);
 }
 
 function playDamageSound() {
   // deeper tone when taking damage
-  playNote(196.0, 0.1);
+  playNote(196.0, 0.1, sfxVolume);
 }
 
 function playHealthPackSound() {
   // quick ascending tones for picking up health
-  playNote(392.0, 0.07);
-  setTimeout(() => playNote(523.25, 0.07), 70);
+  playNote(392.0, 0.07, sfxVolume);
+  setTimeout(() => playNote(523.25, 0.07, sfxVolume), 70);
 }
 
 function playEnemyKillSound() {
   // two descending tones for killing an enemy
-  playNote(329.63, 0.1);
-  setTimeout(() => playNote(261.63, 0.1), 100);
+  playNote(329.63, 0.1, sfxVolume);
+  setTimeout(() => playNote(261.63, 0.1, sfxVolume), 100);
 }
 
 function stopBackgroundMusic() {
@@ -606,7 +609,7 @@ function initGame() {
 function showCharacterSelection() {
   characterSelectionDiv.style.display = "block";
   canvas.style.display = "none";
-  volumeSlider.parentElement.style.display = "none";
+  volumeControl.style.display = "none";
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -615,7 +618,7 @@ function startGame(character) {
   sprite.src = `assets/images/sprite-${character.toLowerCase()}.png`;
   characterSelectionDiv.style.display = "none";
   canvas.style.display = "block";
-  volumeSlider.parentElement.style.display = "flex";
+  volumeControl.style.display = "flex";
   startBackgroundMusic();
 }
 
@@ -781,7 +784,11 @@ selectSmonkBtn.addEventListener("click", () => startGame("Smonk"));
 selectNitroBtn.addEventListener("click", () => startGame("Nitro"));
 selectZeniaBtn.addEventListener("click", () => startGame("Zenia"));
 
-volumeSlider.addEventListener("input", e => {
+sfxVolumeSlider.addEventListener("input", e => {
+  sfxVolume = parseFloat(e.target.value);
+});
+
+musicVolumeSlider.addEventListener("input", e => {
   musicVolume = parseFloat(e.target.value);
 });
 
