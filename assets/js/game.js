@@ -68,16 +68,23 @@ let paused = false;
 let audioCtx;
 let musicInterval;
 let musicVolume = 0.01;
-// 8-note chiptune loop: C4 D4 E4 F4 G4 A4 G4 E4
 const musicNotes = [
-  130.81, // C3
-  146.83, // D3
-  164.82, // E3
-  174.62, // F3
-  196.0,  // G3
-  220.0,  // A3
-  196.0,  // G3
-  164.82 // E3
+  // set 1: original melody
+  130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
+  // set 2: repeat
+  130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
+  // set 3: reversed
+  164.82, 196.0, 220.0, 196.0, 174.62, 164.82, 146.83, 130.81,
+  // set 4: alternate progression
+  196.0, 220.0, 246.94, 220.0, 196.0, 174.62, 164.82, 146.83,
+  // set 5: one octave higher
+  261.63, 293.66, 329.63, 349.23, 392.0, 440.0, 392.0, 329.63,
+  // set 6: octave high reversed
+  329.63, 392.0, 440.0, 392.0, 349.23, 329.63, 293.66, 261.63,
+  // set 7: return to original
+  130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
+  // set 8: reversed to finish
+  164.82, 196.0, 220.0, 196.0, 174.62, 164.82, 146.83, 130.81
 ];
 
 function playNote(freq, duration = 0.3) {
