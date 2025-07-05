@@ -743,7 +743,9 @@
   function startGame(character) {
     cancelAnimationFrame(animationId);
     selectedCharacter = character;
-    sprite.src = `assets/images/sprite-${character.toLowerCase()}.png`;
+    const spritePath = `assets/images/sprite-${character.toLowerCase()}.png`;
+    const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
+    sprite.src = spritePath;
     characterSelectionDiv.style.display = "none";
     canvas.style.display = "block";
     volumeControl.style.display = "flex";
@@ -752,17 +754,25 @@
     gameStartTime = Date.now();
     worldSpeed = 0;
     startBackgroundMusic();
+    if (alreadyLoaded) {
+      initGame();
+    }
   }
 
   function startDemo() {
     const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
     selectedCharacter = randomCharacter;
-    sprite.src = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
+    const spritePath = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
+    const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
+    sprite.src = spritePath;
     autoplaying = true;
     stopBackgroundMusic();
     // Reset time tracking so world speed starts from the baseline
     gameStartTime = Date.now();
     worldSpeed = 0;
+    if (alreadyLoaded) {
+      initGame();
+    }
   }
 
 
