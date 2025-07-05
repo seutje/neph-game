@@ -523,7 +523,6 @@ function gameLoop() {
   worldSpeed = 0;
   if (player.x > canvas.width * 0.6 && player.vx > 0) {
     worldSpeed = -player.vx;
-    player.x = canvas.width * 0.6;
   }
 
   if (keys["ArrowLeft"]) {
