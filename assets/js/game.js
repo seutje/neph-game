@@ -63,6 +63,46 @@ let gameOver = false;
 let animationId;
 let paused = false;
 
+// Web Audio API setup for simple chiptune background music
+let audioCtx;
+let musicInterval;
+const musicNotes = [261.63, 329.63, 392.0, 523.25]; // C4, E4, G4, C5
+
+function playNote(freq, duration = 0.3) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+function startBackgroundMusic() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+  let idx = 0;
+  clearInterval(musicInterval);
+  musicInterval = setInterval(() => {
+    playNote(musicNotes[idx % musicNotes.length]);
+    idx++;
+  }, 300);
+}
+
+function stopBackgroundMusic() {
+  if (musicInterval) {
+    clearInterval(musicInterval);
+    musicInterval = null;
+  }
+}
+
 let frameCount = 0;
 let gameStartTime = Date.now();
 let totalPausedTime = 0;
@@ -485,6 +525,7 @@ function resetGame() {
   resetBtn.style.display = "none";
   scoreContainer.style.display = "none";
   nameEntry.style.display = "none";
+  stopBackgroundMusic();
   showCharacterSelection();
 }
 
@@ -525,6 +566,7 @@ function startGame(character) {
   sprite.src = `assets/images/sprite-${character.toLowerCase()}.png`;
   characterSelectionDiv.style.display = "none";
   canvas.style.display = "block";
+  startBackgroundMusic();
 }
 
 
