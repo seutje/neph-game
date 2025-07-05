@@ -889,7 +889,11 @@
     if (!gameOver) {
       animationId = requestAnimationFrame(gameLoop);
     } else {
-      showGameOver();
+      if (autoplaying) {
+        initGame();
+      } else {
+        showGameOver();
+      }
     }
   }
 
