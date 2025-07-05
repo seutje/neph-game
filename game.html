@@ -23,6 +23,7 @@
     <button id="selectTurf" style="padding:10px 20px;font-size:20px;">Turf</button>
     <button id="selectSeuge" style="padding:10px 20px;font-size:20px;">Seuge</button>
     <button id="selectJerp" style="padding:10px 20px;font-size:20px;">Jerp</button>
+    <button id="selectSmonk" style="padding:10px 20px;font-size:20px;">SMONK</button>
   </div>
   <canvas id="gameCanvas" width="640" height="360" style="display:none;"></canvas>
   <button id="resetBtn" style="display:none;position:absolute;left:50%;bottom:10px;transform:translateX(-50%);padding:10px 20px;font-size:20px;">Restart</button>
@@ -50,6 +51,7 @@
     const selectTurfBtn = document.getElementById("selectTurf");
     const selectSeugeBtn = document.getElementById("selectSeuge");
     const selectJerpBtn = document.getElementById("selectJerp");
+    const selectSmonkBtn = document.getElementById("selectSmonk");
     let selectedCharacter = "Neph";
     const MAX_HIGH_SCORES = 5;
 
@@ -529,6 +531,7 @@ function drawHealth() {
   selectTurfBtn.addEventListener("click", () => startGame("Turf"));
   selectSeugeBtn.addEventListener("click", () => startGame("Seuge"));
   selectJerpBtn.addEventListener("click", () => startGame("Jerp"));
+  selectSmonkBtn.addEventListener("click", () => startGame("Smonk"));
 
   sprite.onload = () => {
     initGame();
