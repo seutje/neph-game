@@ -213,10 +213,11 @@ function collisionSide(a, b) {
   if (Math.abs(dx) <= width && Math.abs(dy) <= height) {
     const wy = width * dy;
     const hx = height * dx;
+    // Canvas coordinates increase downward, so flip the vertical checks
     if (wy > hx) {
-      return wy > -hx ? "top" : "left";
+      return wy > -hx ? "bottom" : "left";
     } else {
-      return wy > -hx ? "right" : "bottom";
+      return wy > -hx ? "right" : "top";
     }
   }
   return null;
@@ -721,16 +722,23 @@ function gameLoop() {
     };
     if (rectsOverlap(playerBox, enemyBox)) {
       const side = collisionSide(playerBox, enemyBox);
-      if (player.attacking && e.state === "walk") {
-        e.state = "hit";
-        playEnemyKillSound();
-        score += 1;
-        enemyKillCount++;
-        if (enemyKillCount % 3 === 0) {
-          healthPacks.push(new HealthPack(e.x, e.y));
+      if (e.state === "walk") {
+        const stompKill = side === "top" && player.vy > 0;
+        if (player.attacking || stompKill) {
+          e.state = "hit";
+          playEnemyKillSound();
+          score += 1;
+          enemyKillCount++;
+          if (enemyKillCount % 3 === 0) {
+            healthPacks.push(new HealthPack(e.x, e.y));
+          }
+          if (stompKill) {
+            player.vy = -10;
+            player.jumping = true;
+          }
+        } else if (side !== "top" && !player.attacking && !player.invincible) {
+          player.hit();
         }
-      } else if (!player.attacking && e.state === "walk" && !player.invincible) {
-        player.hit();
       }
     }
   });
