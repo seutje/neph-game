@@ -121,6 +121,29 @@ function playKick(volume = musicVolume) {
   osc.stop(audioCtx.currentTime + 0.11);
 }
 
+function playSnare(volume = musicVolume) {
+  if (!audioCtx) return;
+  const bufferSize = audioCtx.sampleRate * 0.2;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = "highpass";
+  filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(volume * 5, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+  noise.start();
+  noise.stop(audioCtx.currentTime + 0.2);
+}
+
 function startBackgroundMusic() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -135,6 +158,8 @@ function startBackgroundMusic() {
     playNote(musicNotes[idx % musicNotes.length], 0.3, musicVolume);
     if (beat % 4 === 0) {
       playKick(musicVolume);
+    } else if (beat % 4 === 2) {
+      playSnare(musicVolume);
     }
     idx++;
     beat++;

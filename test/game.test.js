@@ -38,6 +38,7 @@ test('game.js runs without errors', () => {
       this.currentTime = 0;
       this.state = 'running';
       this.destination = {};
+      this.sampleRate = 44100;
     }
     createOscillator() {
       return {
@@ -51,6 +52,28 @@ test('game.js runs without errors', () => {
     createGain() {
       return {
         gain: { setValueAtTime() {} },
+        connect() {},
+      };
+    }
+    createBuffer() {
+      return {
+        getChannelData() {
+          return new Float32Array(0);
+        },
+      };
+    }
+    createBufferSource() {
+      return {
+        buffer: null,
+        connect() {},
+        start() {},
+        stop() {},
+      };
+    }
+    createBiquadFilter() {
+      return {
+        type: '',
+        frequency: { setValueAtTime() {} },
         connect() {},
       };
     }
