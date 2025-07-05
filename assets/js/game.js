@@ -67,7 +67,7 @@ let paused = false;
 // Web Audio API setup for simple chiptune background music
 let audioCtx;
 let musicInterval;
-let musicVolume = 0.025;
+let musicVolume = 0.01;
 // 8-note chiptune loop: C4 D4 E4 F4 G4 A4 G4 E4
 const musicNotes = [
   130.81, // C3
