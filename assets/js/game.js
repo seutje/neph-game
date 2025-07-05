@@ -409,12 +409,23 @@ class Enemy {
         this.vy = -10;
         this.jumping = true;
       }
+      const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
+      const multiplier = 1 + ENEMY_SPEED_INCREMENT * elapsedSeconds;
+      this.vx = this.baseSpeed * multiplier + worldSpeed;
+
+      const prevCenterX = this.x + FRAME_WIDTH / 2;
+      this.x += this.vx;
+      const newCenterX = this.x + FRAME_WIDTH / 2;
+
+      const prevY = this.y;
       this.vy += gravity;
       this.y += this.vy;
+
       if (this.y >= groundY) {
-        const centerX = this.x + FRAME_WIDTH / 2;
-        const overGap = gaps.some(g => centerX >= g.x && centerX <= g.x + g.width);
-        if (!overGap) {
+        const startX = Math.min(prevCenterX, newCenterX);
+        const endX = Math.max(prevCenterX, newCenterX);
+        const overGap = gaps.some(g => endX >= g.x && startX <= g.x + g.width);
+        if (!overGap && prevY <= groundY) {
           this.y = groundY;
           this.vy = 0;
           this.jumping = false;
@@ -426,10 +437,6 @@ class Enemy {
           this.deathTime = Date.now();
         }
       }
-      const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
-      const multiplier = 1 + ENEMY_SPEED_INCREMENT * elapsedSeconds;
-      this.vx = this.baseSpeed * multiplier + worldSpeed;
-      this.x += this.vx;
       this.frame = (this.frame + 0.1) % 2;
     } else if (this.state === "hit") {
       this.frame = 2;
