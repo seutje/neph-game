@@ -15,13 +15,14 @@ const selectJerpBtn = document.getElementById("selectJerp");
 const selectSmonkBtn = document.getElementById("selectSmonk");
 const selectNitroBtn = document.getElementById("selectNitro");
 const selectZeniaBtn = document.getElementById("selectZenia");
+const selectBeercepsBtn = document.getElementById("selectBeerceps");
 const volumeControl = document.getElementById("volumeControl");
 const sfxVolumeSlider = document.getElementById("sfxVolumeSlider");
 const musicVolumeSlider = document.getElementById("musicVolumeSlider");
 let selectedCharacter = "Neph";
 const MAX_HIGH_SCORES = 5;
 
-const characters = ["Neph", "Turf", "Seuge", "Jerp", "Smonk", "Nitro", "Zenia"];
+const characters = ["Neph", "Turf", "Seuge", "Jerp", "Smonk", "Nitro", "Zenia", "Beerceps"];
 const spriteCache = {};
 
 const gravity = 0.5;
@@ -875,6 +876,7 @@ selectJerpBtn.addEventListener("click", () => startGame("Jerp"));
 selectSmonkBtn.addEventListener("click", () => startGame("Smonk"));
 selectNitroBtn.addEventListener("click", () => startGame("Nitro"));
 selectZeniaBtn.addEventListener("click", () => startGame("Zenia"));
+selectBeercepsBtn.addEventListener("click", () => startGame("Beerceps"));
 
 sfxVolumeSlider.addEventListener("input", e => {
   sfxVolume = parseFloat(e.target.value);
