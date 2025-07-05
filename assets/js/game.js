@@ -108,6 +108,16 @@ function startBackgroundMusic() {
   }, 300);
 }
 
+function playJumpSound() {
+  // quick up-beep
+  playNote(329.63, 0.1);
+}
+
+function playAttackSound() {
+  // short lower tone for attack
+  playNote(261.63, 0.1);
+}
+
 function stopBackgroundMusic() {
   if (musicInterval) {
     clearInterval(musicInterval);
@@ -195,6 +205,7 @@ const player = {
     if (!this.attacking && this.cooldown <= 0) {
       this.attacking = true;
       this.attackTimer = ATTACK_DURATION_FRAMES;
+      playAttackSound();
     }
   },
   block() {
@@ -628,6 +639,7 @@ function gameLoop() {
   if (keys["ArrowUp"] && !player.jumping) {
     player.vy = -10;
     player.jumping = true;
+    playJumpSound();
   }
 
   player.update();
