@@ -25,7 +25,7 @@ const gravity = 0.5;
 const groundY = 250;
 const CLOUD_SPEED = 0.2;
 let worldSpeed = 0;
-const PLAYER_SPEED = 2;
+const PLAYER_SPEED = 4;
 
 const BASE_ENEMY_SPEED = -1.5;
 const ENEMY_SPEED_INCREMENT = 8 / 60;
