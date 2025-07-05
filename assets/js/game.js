@@ -67,8 +67,7 @@ let paused = false;
 // Web Audio API setup for simple chiptune background music
 let audioCtx;
 let musicInterval;
-let musicVolume = 0.05;
-// 64-note chiptune loop with variations after the second set
+let musicVolume = 0.01;
 const musicNotes = [
   // set 1: original melody
   130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
@@ -114,6 +113,16 @@ function startBackgroundMusic() {
     playNote(musicNotes[idx % musicNotes.length]);
     idx++;
   }, 300);
+}
+
+function playJumpSound() {
+  // quick up-beep
+  playNote(329.63, 0.1);
+}
+
+function playAttackSound() {
+  // short lower tone for attack
+  playNote(261.63, 0.1);
 }
 
 function stopBackgroundMusic() {
@@ -203,6 +212,7 @@ const player = {
     if (!this.attacking && this.cooldown <= 0) {
       this.attacking = true;
       this.attackTimer = ATTACK_DURATION_FRAMES;
+      playAttackSound();
     }
   },
   block() {
@@ -636,6 +646,7 @@ function gameLoop() {
   if (keys["ArrowUp"] && !player.jumping) {
     player.vy = -10;
     player.jumping = true;
+    playJumpSound();
   }
 
   player.update();
