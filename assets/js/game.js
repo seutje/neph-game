@@ -106,11 +106,13 @@
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "square";
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 0.01);
     osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start();
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration);
     osc.stop(audioCtx.currentTime + duration);
   }
 
@@ -119,13 +121,14 @@
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "sine";
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(volume * 10, audioCtx.currentTime + 0.01);
     osc.frequency.setValueAtTime(150, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
-    gain.gain.setValueAtTime(volume*10, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
     osc.stop(audioCtx.currentTime + 0.11);
   }
 
@@ -143,12 +146,13 @@
     filter.type = "highpass";
     filter.frequency.setValueAtTime(800, audioCtx.currentTime);
     const gain = audioCtx.createGain();
-    gain.gain.setValueAtTime(volume * 5, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(volume * 5, audioCtx.currentTime + 0.01);
     noise.connect(filter);
     filter.connect(gain);
     gain.connect(audioCtx.destination);
     noise.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
     noise.stop(audioCtx.currentTime + 0.2);
   }
 
