@@ -4,40 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Platform Game</title>
-  <style>
-    canvas {
-      border: 1px solid black;
-      display: block;
-      margin: 0 auto;
-      background-color: #e0ffff;
-    }
-    body {
-      position: relative;
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
-  <div id="characterSelection" style="text-align:center;padding-top:100px;">
+  <div id="characterSelection">
     <h2>Select Your Character</h2>
-    <button id="selectNeph" style="padding:10px 20px;font-size:20px;">Neph</button>
-    <button id="selectTurf" style="padding:10px 20px;font-size:20px;">Turf</button>
-    <button id="selectSeuge" style="padding:10px 20px;font-size:20px;">Seuge</button>
-    <button id="selectJerp" style="padding:10px 20px;font-size:20px;">Jerp</button>
-    <button id="selectSmonk" style="padding:10px 20px;font-size:20px;">SMONK</button>
-    <button id="selectNitro" style="padding:10px 20px;font-size:20px;">Nitro</button>
-    <button id="selectZenia" style="padding:10px 20px;font-size:20px;">Zenia</button>
+    <button id="selectNeph">Neph</button>
+    <button id="selectTurf">Turf</button>
+    <button id="selectSeuge">Seuge</button>
+    <button id="selectJerp">Jerp</button>
+    <button id="selectSmonk">SMONK</button>
+    <button id="selectNitro">Nitro</button>
+    <button id="selectZenia">Zenia</button>
   </div>
-  <canvas id="gameCanvas" width="640" height="360" style="display:none;"></canvas>
-  <button id="resetBtn" style="display:none;position:absolute;left:50%;bottom:10px;transform:translateX(-50%);padding:10px 20px;font-size:20px;">Restart</button>
-  <div id="scoreContainer" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);color:white;text-align:center;font-family:Arial;">
+  <canvas id="gameCanvas" width="640" height="360"></canvas>
+  <button id="resetBtn">Restart</button>
+  <div id="scoreContainer">
     <h2>High Scores</h2>
-    <ol id="highScoreList" style="list-style:none;padding:0;margin:0;"></ol>
-    <div id="nameEntry" style="margin-top:10px;display:none;">
-      <input id="nameInput" maxlength="24" value="Neph" style="padding:5px;" />
-      <button id="saveScoreBtn" style="padding:5px;">Save Score</button>
+    <ol id="highScoreList"></ol>
+    <div id="nameEntry">
+      <input id="nameInput" maxlength="24" value="Neph" />
+      <button id="saveScoreBtn">Save Score</button>
     </div>
   </div>
-  <div id="pauseOverlay" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);font-size:40px;color:black;text-align:center;">Paused</div>
+  <div id="pauseOverlay">Paused</div>
   <script src="assets/js/game.js"></script>
 </body>
 </html>

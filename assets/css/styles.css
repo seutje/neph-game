@@ -1,0 +1,75 @@
+canvas {
+  border: 1px solid black;
+  display: block;
+  margin: 0 auto;
+  background-color: #e0ffff;
+}
+
+body {
+  position: relative;
+}
+
+#characterSelection {
+  text-align: center;
+  padding-top: 100px;
+}
+
+#characterSelection button {
+  padding: 10px 20px;
+  font-size: 20px;
+}
+
+#gameCanvas {
+  display: none;
+}
+
+#resetBtn {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 20px;
+}
+
+#scoreContainer {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+  font-family: Arial;
+}
+
+#highScoreList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#nameEntry {
+  margin-top: 10px;
+  display: none;
+}
+
+#nameInput {
+  padding: 5px;
+}
+
+#saveScoreBtn {
+  padding: 5px;
+}
+
+#pauseOverlay {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  color: black;
+  text-align: center;
+}
