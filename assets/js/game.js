@@ -145,6 +145,13 @@ function playEnemyKillSound() {
   setTimeout(() => playNote(261.63, 0.1, sfxVolume), 100);
 }
 
+function playDeathSound() {
+  // descending tones when the player dies
+  playNote(261.63, 0.15, sfxVolume);
+  setTimeout(() => playNote(196.0, 0.15, sfxVolume), 150);
+  setTimeout(() => playNote(130.81, 0.15, sfxVolume), 300);
+}
+
 function stopBackgroundMusic() {
   if (musicInterval) {
     clearInterval(musicInterval);
@@ -553,6 +560,7 @@ function drawGround() {
 }
 
 function showGameOver() {
+  playDeathSound();
   ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "white";
