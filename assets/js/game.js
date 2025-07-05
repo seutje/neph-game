@@ -62,8 +62,18 @@ class HealthPack {
   constructor(x, y) {
     this.x = x;
     this.y = y;
+    this.vy = 0;
     this.radius = 10;
     this.createdAt = Date.now();
+  }
+
+  update() {
+    this.vy += gravity;
+    this.y += this.vy;
+    if (this.y + this.radius > groundY + 75) {
+      this.y = groundY + 75 - this.radius;
+      this.vy = 0;
+    }
   }
 
   draw() {
@@ -499,6 +509,7 @@ function gameLoop() {
 
   player.draw();
   enemies.forEach(e => e.draw());
+  healthPacks.forEach(hp => hp.update());
   healthPacks.forEach(hp => hp.draw());
 
   // remove enemies after their death animation has finished
