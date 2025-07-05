@@ -735,7 +735,7 @@ function gameLoop() {
             player.vy = -10;
             player.jumping = true;
           }
-        } else if (!player.attacking && !player.invincible) {
+        } else if (side !== "top" && !player.attacking && !player.invincible) {
           player.hit();
         }
       }
