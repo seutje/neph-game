@@ -740,8 +740,8 @@
     characterSelectionDiv.style.display = "none";
     canvas.style.display = "block";
     volumeControl.style.display = "flex";
-    startBackgroundMusic();
     autoplaying = false;
+    startBackgroundMusic();
   }
 
   function startDemo() {
