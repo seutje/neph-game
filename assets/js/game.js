@@ -150,6 +150,7 @@ function playDeathSound() {
   playNote(261.63, 0.15, sfxVolume);
   setTimeout(() => playNote(196.0, 0.15, sfxVolume), 150);
   setTimeout(() => playNote(130.81, 0.15, sfxVolume), 300);
+  setTimeout(() => playNote(98.0, 0.15, sfxVolume), 450);
 }
 
 function stopBackgroundMusic() {
