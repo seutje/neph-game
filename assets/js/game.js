@@ -24,6 +24,9 @@
   const musicVolumeSlider = document.getElementById("musicVolumeSlider");
   let selectedCharacter = "Neph";
   let autoplaying = false;
+  function audioEnabled() {
+    return !autoplaying;
+  }
   const MAX_HIGH_SCORES = 5;
 
   const characters = ["Neph", "Turf", "Seuge", "Jerp", "Smonk", "Nitro", "Zenia", "Beerceps"];
@@ -99,7 +102,7 @@
   ];
 
   function playNote(freq, duration = 0.3, volume = musicVolume) {
-    if (!audioCtx) return;
+    if (!audioEnabled() || !audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "square";
@@ -112,7 +115,7 @@
   }
 
   function playKick(volume = musicVolume) {
-    if (!audioCtx) return;
+    if (!audioEnabled() || !audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "sine";
@@ -127,7 +130,7 @@
   }
 
   function playSnare(volume = musicVolume) {
-    if (!audioCtx) return;
+    if (!audioEnabled() || !audioCtx) return;
     const bufferSize = audioCtx.sampleRate * 0.2;
     const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -150,6 +153,9 @@
   }
 
   function startBackgroundMusic() {
+    if (!audioEnabled()) {
+      return;
+    }
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -172,33 +178,39 @@
   }
 
   function playJumpSound() {
+    if (!audioEnabled()) return;
     // quick up-beep
     playNote(329.63, 0.1, sfxVolume);
   }
 
   function playAttackSound() {
+    if (!audioEnabled()) return;
     // short lower tone for attack
     playNote(261.63, 0.1, sfxVolume);
   }
 
   function playDamageSound() {
+    if (!audioEnabled()) return;
     // deeper tone when taking damage
     playNote(196.0, 0.1, sfxVolume);
   }
 
   function playHealthPackSound() {
+    if (!audioEnabled()) return;
     // quick ascending tones for picking up health
     playNote(392.0, 0.07, sfxVolume);
     setTimeout(() => playNote(523.25, 0.07, sfxVolume), 70);
   }
 
   function playEnemyKillSound() {
+    if (!audioEnabled()) return;
     // two descending tones for killing an enemy
     playNote(329.63, 0.1, sfxVolume);
     setTimeout(() => playNote(261.63, 0.1, sfxVolume), 100);
   }
 
   function playDeathSound() {
+    if (!audioEnabled()) return;
     // descending tones when the player dies
     playNote(261.63, 0.15, sfxVolume);
     setTimeout(() => playNote(196.0, 0.15, sfxVolume), 150);
@@ -728,8 +740,8 @@
     characterSelectionDiv.style.display = "none";
     canvas.style.display = "block";
     volumeControl.style.display = "flex";
-    startBackgroundMusic();
     autoplaying = false;
+    startBackgroundMusic();
   }
 
   function startDemo() {
@@ -737,7 +749,7 @@
     selectedCharacter = randomCharacter;
     sprite.src = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
     autoplaying = true;
-    startBackgroundMusic();
+    stopBackgroundMusic();
   }
 
 
