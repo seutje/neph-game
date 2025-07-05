@@ -35,6 +35,7 @@ function loadGameDom() {
       this.currentTime = 0;
       this.state = 'running';
       this.destination = {};
+      this.sampleRate = 44100;
     }
     createOscillator() {
       return {
@@ -48,6 +49,28 @@ function loadGameDom() {
     createGain() {
       return {
         gain: { setValueAtTime() {} },
+        connect() {},
+      };
+    }
+    createBuffer() {
+      return {
+        getChannelData() {
+          return new Float32Array(0);
+        },
+      };
+    }
+    createBufferSource() {
+      return {
+        buffer: null,
+        connect() {},
+        start() {},
+        stop() {},
+      };
+    }
+    createBiquadFilter() {
+      return {
+        type: '',
+        frequency: { setValueAtTime() {} },
         connect() {},
       };
     }
