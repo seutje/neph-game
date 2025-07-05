@@ -125,6 +125,23 @@ function playAttackSound() {
   playNote(261.63, 0.1);
 }
 
+function playDamageSound() {
+  // deeper tone when taking damage
+  playNote(196.0, 0.1);
+}
+
+function playHealthPackSound() {
+  // quick ascending tones for picking up health
+  playNote(392.0, 0.07);
+  setTimeout(() => playNote(523.25, 0.07), 70);
+}
+
+function playEnemyKillSound() {
+  // two descending tones for killing an enemy
+  playNote(329.63, 0.1);
+  setTimeout(() => playNote(261.63, 0.1), 100);
+}
+
 function stopBackgroundMusic() {
   if (musicInterval) {
     clearInterval(musicInterval);
@@ -321,6 +338,7 @@ const player = {
       this.vy = -8;
       this.jumping = true;
       health--;
+      playDamageSound();
       if (health < 1) {
         gameOver = true;
       }
@@ -679,6 +697,7 @@ function gameLoop() {
       const side = collisionSide(playerBox, enemyBox);
       if (player.attacking && e.state === "walk") {
         e.state = "hit";
+        playEnemyKillSound();
         score += 1;
         enemyKillCount++;
         if (enemyKillCount % 3 === 0) {
@@ -725,6 +744,7 @@ function gameLoop() {
 
     if (rectsOverlap(playerBox, packBox)) {
       health++;
+      playHealthPackSound();
       return false; // Remove pack
     }
 
