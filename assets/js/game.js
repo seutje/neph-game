@@ -28,10 +28,13 @@ const gravity = 0.5;
 const groundY = 250;
 const CLOUD_SPEED = 0.2;
 let worldSpeed = 0;
-const PLAYER_SPEED = 4;
 
 const BASE_ENEMY_SPEED = -1.5;
 const ENEMY_SPEED_INCREMENT = 8 / 60;
+
+const BASE_WORLD_SPEED = -0.2;
+const WORLD_SPEED_INCREMENT = ENEMY_SPEED_INCREMENT;
+const PLAYER_SPEED = 4;
 const BASE_SPAWN_INTERVAL = 120;
 
 const sprite = new Image();
@@ -236,6 +239,7 @@ const player = {
   blockCooldown: 0,
   invincible: false,
   invincibility: 0,
+  touchingLeft: false,
   attack() {
     if (!this.attacking && this.cooldown <= 0) {
       this.attacking = true;
@@ -296,8 +300,15 @@ const player = {
     this.x += this.vx + worldSpeed;
     if (this.x < 0) {
       this.x = 0;
-    } else if (this.x + this.width > canvas.width) {
-      this.x = canvas.width - this.width;
+      if (!this.touchingLeft) {
+        this.touchingLeft = true;
+        this.hit();
+      }
+    } else {
+      this.touchingLeft = false;
+      if (this.x + this.width > canvas.width) {
+        this.x = canvas.width - this.width;
+      }
     }
   },
   draw() {
@@ -608,6 +619,7 @@ function initGame() {
   player.attacking = false;
   player.attackTimer = 0;
   player.cooldown = 0;
+  player.touchingLeft = false;
   initTerrain();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   resetBtn.style.display = "none";
@@ -661,9 +673,10 @@ function gameLoop() {
   updateClouds();
   drawClouds();
 
-  worldSpeed = 0;
+  const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
+  worldSpeed = BASE_WORLD_SPEED * (1 + WORLD_SPEED_INCREMENT * elapsedSeconds);
   if (player.x > canvas.width * 0.6 && player.vx > 0) {
-    worldSpeed = -player.vx;
+    worldSpeed -= player.vx;
   }
 
   if (keys["ArrowLeft"]) {
@@ -723,7 +736,6 @@ function gameLoop() {
   });
 
   spawnTimer++;
-  const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
   const spawnInterval = BASE_SPAWN_INTERVAL / (1 + ENEMY_SPEED_INCREMENT * elapsedSeconds);
   if (spawnTimer > spawnInterval) {
     const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
