@@ -87,6 +87,8 @@
 
     let frameCount = 0;
     let gameStartTime = Date.now();
+    let totalPausedTime = 0;
+    let pauseStartTime = 0;
 
     function rectsOverlap(a, b) {
       return (
@@ -246,7 +248,7 @@
               this.vy = 0;
               this.jumping = false;
             }
-            const elapsedSeconds = (Date.now() - gameStartTime) / 1000;
+            const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
             const multiplier = 1 + ENEMY_SPEED_INCREMENT * elapsedSeconds;
             this.vx = this.baseSpeed * multiplier;
             this.x += this.vx;
@@ -310,9 +312,11 @@
         if (!gameOver) {
           paused = !paused;
           if (paused) {
+            pauseStartTime = Date.now();
             cancelAnimationFrame(animationId);
             pauseOverlay.style.display = "block";
           } else {
+            totalPausedTime += Date.now() - pauseStartTime;
             pauseOverlay.style.display = "none";
             animationId = requestAnimationFrame(gameLoop);
           }
@@ -420,6 +424,7 @@ function drawHealth() {
     enemies = [];
     spawnTimer = 0;
     gameStartTime = Date.now();
+    totalPausedTime = 0;
     player.x = 50;
     player.y = groundY;
     player.vx = 0;
@@ -492,7 +497,7 @@ function drawHealth() {
         });
 
       spawnTimer++;
-      const elapsedSeconds = (Date.now() - gameStartTime) / 1000;
+      const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
       const spawnInterval = BASE_SPAWN_INTERVAL / (1 + ENEMY_SPEED_INCREMENT * elapsedSeconds);
       if (spawnTimer > spawnInterval) {
         enemies.push(new Enemy(canvas.width));
