@@ -741,6 +741,9 @@
     canvas.style.display = "block";
     volumeControl.style.display = "flex";
     autoplaying = false;
+    // Reset timing so regular play always begins at base speed
+    gameStartTime = Date.now();
+    worldSpeed = 0;
     startBackgroundMusic();
   }
 
@@ -750,6 +753,9 @@
     sprite.src = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
     autoplaying = true;
     stopBackgroundMusic();
+    // Reset time tracking so world speed starts from the baseline
+    gameStartTime = Date.now();
+    worldSpeed = 0;
   }
 
 
