@@ -1,26 +1,29 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const resetBtn = document.getElementById("resetBtn");
-const scoreContainer = document.getElementById("scoreContainer");
-const highScoreList = document.getElementById("highScoreList");
-const nameEntry = document.getElementById("nameEntry");
-const nameInput = document.getElementById("nameInput");
-const saveScoreBtn = document.getElementById("saveScoreBtn");
-const pauseOverlay = document.getElementById("pauseOverlay");
-const characterSelectionDiv = document.getElementById("characterSelection");
-const selectNephBtn = document.getElementById("selectNeph");
-const selectTurfBtn = document.getElementById("selectTurf");
-const selectSeugeBtn = document.getElementById("selectSeuge");
-const selectJerpBtn = document.getElementById("selectJerp");
-const selectSmonkBtn = document.getElementById("selectSmonk");
-const selectNitroBtn = document.getElementById("selectNitro");
-const selectZeniaBtn = document.getElementById("selectZenia");
-const selectBeercepsBtn = document.getElementById("selectBeerceps");
-const volumeControl = document.getElementById("volumeControl");
-const sfxVolumeSlider = document.getElementById("sfxVolumeSlider");
-const musicVolumeSlider = document.getElementById("musicVolumeSlider");
-let selectedCharacter = "Neph";
-const MAX_HIGH_SCORES = 5;
+(() => {
+  const Game = {};
+
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+  const resetBtn = document.getElementById("resetBtn");
+  const scoreContainer = document.getElementById("scoreContainer");
+  const highScoreList = document.getElementById("highScoreList");
+  const nameEntry = document.getElementById("nameEntry");
+  const nameInput = document.getElementById("nameInput");
+  const saveScoreBtn = document.getElementById("saveScoreBtn");
+  const pauseOverlay = document.getElementById("pauseOverlay");
+  const characterSelectionDiv = document.getElementById("characterSelection");
+  const selectNephBtn = document.getElementById("selectNeph");
+  const selectTurfBtn = document.getElementById("selectTurf");
+  const selectSeugeBtn = document.getElementById("selectSeuge");
+  const selectJerpBtn = document.getElementById("selectJerp");
+  const selectSmonkBtn = document.getElementById("selectSmonk");
+  const selectNitroBtn = document.getElementById("selectNitro");
+  const selectZeniaBtn = document.getElementById("selectZenia");
+  const selectBeercepsBtn = document.getElementById("selectBeerceps");
+  const volumeControl = document.getElementById("volumeControl");
+  const sfxVolumeSlider = document.getElementById("sfxVolumeSlider");
+  const musicVolumeSlider = document.getElementById("musicVolumeSlider");
+  let selectedCharacter = "Neph";
+  const MAX_HIGH_SCORES = 5;
 
 const characters = ["Neph", "Turf", "Seuge", "Jerp", "Smonk", "Nitro", "Zenia", "Beerceps"];
 const spriteCache = {};
@@ -890,19 +893,28 @@ sprite.onload = () => {
   initGame();
 };
 
-function preload() {
-  let loaded = 0;
-  for (const char of characters) {
-    const img = new Image();
-    img.src = `assets/images/sprite-${char.toLowerCase()}.png`;
-    img.onload = () => {
-      loaded++;
-      if (loaded === characters.length) {
-        showCharacterSelection();
-      }
-    };
-    spriteCache[char.toLowerCase()] = img;
+  function preload() {
+    let loaded = 0;
+    for (const char of characters) {
+      const img = new Image();
+      img.src = `assets/images/sprite-${char.toLowerCase()}.png`;
+      img.onload = () => {
+        loaded++;
+        if (loaded === characters.length) {
+          showCharacterSelection();
+        }
+      };
+      spriteCache[char.toLowerCase()] = img;
+    }
   }
-}
 
-preload();
+  Game.rectsOverlap = rectsOverlap;
+  Game.collisionSide = collisionSide;
+  Game.qualifiesForHighScore = qualifiesForHighScore;
+  Game.loadHighScores = loadHighScores;
+  Game.saveHighScores = saveHighScores;
+
+  window.Game = Game;
+
+  preload();
+})();
