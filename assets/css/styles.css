@@ -73,3 +73,16 @@ body {
   color: black;
   text-align: center;
 }
+
+#volumeControl {
+  position: absolute;
+  top: 30px;
+  left: 10px;
+  display: none;
+  align-items: center;
+  gap: 5px;
+}
+
+#volumeControl input[type="range"] {
+  width: 100px;
+}
