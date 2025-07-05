@@ -28,12 +28,13 @@ const gravity = 0.5;
 const groundY = 250;
 const CLOUD_SPEED = 0.2;
 let worldSpeed = 0;
-const BASE_WORLD_SPEED = -0.2;
-const WORLD_SPEED_INCREMENT = ENEMY_SPEED_INCREMENT;
-const PLAYER_SPEED = 4;
 
 const BASE_ENEMY_SPEED = -1.5;
 const ENEMY_SPEED_INCREMENT = 8 / 60;
+
+const BASE_WORLD_SPEED = -0.2;
+const WORLD_SPEED_INCREMENT = ENEMY_SPEED_INCREMENT;
+const PLAYER_SPEED = 4;
 const BASE_SPAWN_INTERVAL = 120;
 
 const sprite = new Image();
@@ -735,7 +736,6 @@ function gameLoop() {
   });
 
   spawnTimer++;
-  const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
   const spawnInterval = BASE_SPAWN_INTERVAL / (1 + ENEMY_SPEED_INCREMENT * elapsedSeconds);
   if (spawnTimer > spawnInterval) {
     const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
