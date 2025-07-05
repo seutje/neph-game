@@ -45,6 +45,8 @@ const ENEMY_OFFSET_Y = 3;
 const DEBUG = false;
 const ATTACK_DURATION_FRAMES = 12; // 0.2s at 60fps
 const ATTACK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
+const BLOCK_DURATION_FRAMES = 30; // 0.5s at 60fps
+const BLOCK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
 let score = 0;
 let health = 3;
 let gameOver = false;
@@ -123,12 +125,20 @@ const player = {
   blocking: false,
   attackTimer: 0,
   cooldown: 0,
+  blockTimer: 0,
+  blockCooldown: 0,
   invincible: false,
   invincibility: 0,
   attack() {
     if (!this.attacking && this.cooldown <= 0) {
       this.attacking = true;
       this.attackTimer = ATTACK_DURATION_FRAMES;
+    }
+  },
+  block() {
+    if (!this.blocking && this.blockCooldown <= 0) {
+      this.blocking = true;
+      this.blockTimer = BLOCK_DURATION_FRAMES;
     }
   },
   update() {
@@ -146,6 +156,16 @@ const player = {
       }
     } else if (this.cooldown > 0) {
       this.cooldown--;
+    }
+
+    if (this.blocking) {
+      this.blockTimer--;
+      if (this.blockTimer <= 0) {
+        this.blocking = false;
+        this.blockCooldown = BLOCK_COOLDOWN_FRAMES;
+      }
+    } else if (this.blockCooldown > 0) {
+      this.blockCooldown--;
     }
     this.vy += gravity;
     this.y += this.vy;
@@ -325,6 +345,9 @@ document.addEventListener("keydown", e => {
     if (e.key === " " && !keys[e.key]) {
       player.attack();
     }
+    if (e.key === "ArrowDown" && !keys[e.key]) {
+      player.block();
+    }
     keys[e.key] = true;
   }
 });
@@ -466,16 +489,11 @@ function gameLoop() {
   drawGround();
 
   player.vx = 0;
-  if (keys["ArrowDown"]) {
-    player.blocking = true;
-  } else {
-    player.blocking = false;
-    if (keys["ArrowLeft"]) player.vx = -2;
-    if (keys["ArrowRight"]) player.vx = 2;
-    if (keys["ArrowUp"] && !player.jumping) {
-      player.vy = -10;
-      player.jumping = true;
-    }
+  if (keys["ArrowLeft"]) player.vx = -2;
+  if (keys["ArrowRight"]) player.vx = 2;
+  if (keys["ArrowUp"] && !player.jumping) {
+    player.vy = -10;
+    player.jumping = true;
   }
 
   player.update();
