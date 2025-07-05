@@ -400,7 +400,10 @@ class Enemy {
         }
       }
       if (this.y > canvas.height) {
-        this.state = "remove";
+        if (this.state === "walk") {
+          this.state = "dead";
+          this.deathTime = Date.now();
+        }
       }
       const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
       const multiplier = 1 + ENEMY_SPEED_INCREMENT * elapsedSeconds;
