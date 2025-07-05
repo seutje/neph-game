@@ -694,6 +694,8 @@
   }
 
   function resetGame() {
+    worldSpeed = 0;
+    gameStartTime = Date.now();
     resetBtn.style.display = "none";
     scoreContainer.style.display = "none";
     nameEntry.style.display = "none";
@@ -709,6 +711,7 @@
     spawnTimer = 0;
     enemyKillCount = 0;
     healthPacks = [];
+    worldSpeed = 0;
     gameStartTime = Date.now();
     totalPausedTime = 0;
     player.x = 50;
