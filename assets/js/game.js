@@ -23,6 +23,7 @@
   const sfxVolumeSlider = document.getElementById("sfxVolumeSlider");
   const musicVolumeSlider = document.getElementById("musicVolumeSlider");
   let selectedCharacter = "Neph";
+  let autoplaying = false;
   const MAX_HIGH_SCORES = 5;
 
   const characters = ["Neph", "Turf", "Seuge", "Jerp", "Smonk", "Nitro", "Zenia", "Beerceps"];
@@ -559,6 +560,22 @@
     localStorage.setItem("highScores", JSON.stringify(scores));
   }
 
+  function autoPlayAI() {
+    player.vx = PLAYER_SPEED;
+    const centerX = player.x + player.width / 2;
+    const lookAhead = 50;
+    const gapAhead = gaps.find(g => g.x > centerX && g.x - centerX < lookAhead);
+    if (gapAhead && !player.jumping) {
+      player.vy = -10;
+      player.jumping = true;
+      playJumpSound();
+    }
+    const enemyAhead = enemies.find(e => e.x > player.x && e.x - player.x < lookAhead && e.state === "walk");
+    if (enemyAhead && !player.attacking) {
+      player.attack();
+    }
+  }
+
   function renderHighScores() {
     const scores = loadHighScores();
     highScoreList.innerHTML = scores.map(s => `<li>${s.name}: ${s.score}</li>`).join("");
@@ -696,18 +713,30 @@
   }
 
   function showCharacterSelection() {
+    cancelAnimationFrame(animationId);
     characterSelectionDiv.style.display = "block";
-    canvas.style.display = "none";
+    canvas.style.display = "block";
     volumeControl.style.display = "none";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    startDemo();
   }
 
   function startGame(character) {
+    cancelAnimationFrame(animationId);
     selectedCharacter = character;
     sprite.src = `assets/images/sprite-${character.toLowerCase()}.png`;
     characterSelectionDiv.style.display = "none";
     canvas.style.display = "block";
     volumeControl.style.display = "flex";
+    startBackgroundMusic();
+    autoplaying = false;
+  }
+
+  function startDemo() {
+    const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
+    selectedCharacter = randomCharacter;
+    sprite.src = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
+    autoplaying = true;
     startBackgroundMusic();
   }
 
@@ -746,18 +775,22 @@
       worldSpeed -= player.vx;
     }
 
-    if (keys["ArrowLeft"]) {
-      player.vx = -PLAYER_SPEED;
-    } else if (keys["ArrowRight"]) {
-      player.vx = PLAYER_SPEED;
+    if (autoplaying) {
+      autoPlayAI();
     } else {
-      player.vx = 0;
-    }
+      if (keys["ArrowLeft"]) {
+        player.vx = -PLAYER_SPEED;
+      } else if (keys["ArrowRight"]) {
+        player.vx = PLAYER_SPEED;
+      } else {
+        player.vx = 0;
+      }
 
-    if (keys["ArrowUp"] && !player.jumping) {
-      player.vy = -10;
-      player.jumping = true;
-      playJumpSound();
+      if (keys["ArrowUp"] && !player.jumping) {
+        player.vy = -10;
+        player.jumping = true;
+        playJumpSound();
+      }
     }
 
     player.update();
