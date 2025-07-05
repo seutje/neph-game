@@ -106,6 +106,21 @@ function playNote(freq, duration = 0.3, volume = musicVolume) {
   osc.stop(audioCtx.currentTime + duration);
 }
 
+function playKick(volume = musicVolume) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+  gain.gain.setValueAtTime(volume*10, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.11);
+}
+
 function startBackgroundMusic() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -114,10 +129,15 @@ function startBackgroundMusic() {
     audioCtx.resume();
   }
   let idx = 0;
+  let beat = 0;
   clearInterval(musicInterval);
   musicInterval = setInterval(() => {
     playNote(musicNotes[idx % musicNotes.length], 0.3, musicVolume);
+    if (beat % 4 === 0) {
+      playKick(musicVolume);
+    }
     idx++;
+    beat++;
   }, 300);
 }
 
