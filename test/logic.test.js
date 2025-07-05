@@ -8,7 +8,7 @@ async function setup() {
 
 test('rectsOverlap detects collisions correctly', async () => {
   const dom = await setup();
-  const { rectsOverlap } = dom.window;
+  const { rectsOverlap } = dom.window.Game;
   expect(rectsOverlap(
     { x: 0, y: 0, width: 10, height: 10 },
     { x: 5, y: 5, width: 10, height: 10 }
@@ -21,7 +21,7 @@ test('rectsOverlap detects collisions correctly', async () => {
 
 test('collisionSide identifies side of collision', async () => {
   const dom = await setup();
-  const { collisionSide } = dom.window;
+  const { collisionSide } = dom.window.Game;
   const a = { x: 10, y: 10, width: 10, height: 10 };
   const bLeft = { x: 5, y: 10, width: 10, height: 10 };
   const bTop = { x: 10, y: 5, width: 10, height: 10 };
@@ -31,7 +31,7 @@ test('collisionSide identifies side of collision', async () => {
 
 test('qualifiesForHighScore evaluates scores', async () => {
   const dom = await setup();
-  const { qualifiesForHighScore } = dom.window;
+  const { qualifiesForHighScore } = dom.window.Game;
   dom.window.localStorage.setItem('highScores', JSON.stringify([
     { name: 'A', score: 10 },
     { name: 'B', score: 9 },
@@ -50,7 +50,7 @@ test('qualifiesForHighScore evaluates scores', async () => {
 
 test('saveHighScores and loadHighScores round trip', async () => {
   const dom = await setup();
-  const { saveHighScores, loadHighScores } = dom.window;
+  const { saveHighScores, loadHighScores } = dom.window.Game;
   const arr = [{ name: 'Foo', score: 12 }];
   saveHighScores(arr);
   expect(loadHighScores()).toEqual(arr);
