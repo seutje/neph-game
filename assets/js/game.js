@@ -15,6 +15,7 @@ const selectJerpBtn = document.getElementById("selectJerp");
 const selectSmonkBtn = document.getElementById("selectSmonk");
 const selectNitroBtn = document.getElementById("selectNitro");
 const selectZeniaBtn = document.getElementById("selectZenia");
+const volumeSlider = document.getElementById("volumeSlider");
 let selectedCharacter = "Neph";
 const MAX_HIGH_SCORES = 5;
 
@@ -62,6 +63,47 @@ let health = 3;
 let gameOver = false;
 let animationId;
 let paused = false;
+
+// Web Audio API setup for simple chiptune background music
+let audioCtx;
+let musicInterval;
+let musicVolume = 0.05;
+const musicNotes = [261.63, 329.63, 392.0, 523.25]; // C4, E4, G4, C5
+
+function playNote(freq, duration = 0.3) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(musicVolume, audioCtx.currentTime);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+function startBackgroundMusic() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+  let idx = 0;
+  clearInterval(musicInterval);
+  musicInterval = setInterval(() => {
+    playNote(musicNotes[idx % musicNotes.length]);
+    idx++;
+  }, 300);
+}
+
+function stopBackgroundMusic() {
+  if (musicInterval) {
+    clearInterval(musicInterval);
+    musicInterval = null;
+  }
+}
 
 let frameCount = 0;
 let gameStartTime = Date.now();
@@ -485,6 +527,7 @@ function resetGame() {
   resetBtn.style.display = "none";
   scoreContainer.style.display = "none";
   nameEntry.style.display = "none";
+  stopBackgroundMusic();
   showCharacterSelection();
 }
 
@@ -517,6 +560,7 @@ function initGame() {
 function showCharacterSelection() {
   characterSelectionDiv.style.display = "block";
   canvas.style.display = "none";
+  volumeSlider.parentElement.style.display = "none";
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -525,6 +569,8 @@ function startGame(character) {
   sprite.src = `assets/images/sprite-${character.toLowerCase()}.png`;
   characterSelectionDiv.style.display = "none";
   canvas.style.display = "block";
+  volumeSlider.parentElement.style.display = "flex";
+  startBackgroundMusic();
 }
 
 
@@ -685,6 +731,10 @@ selectJerpBtn.addEventListener("click", () => startGame("Jerp"));
 selectSmonkBtn.addEventListener("click", () => startGame("Smonk"));
 selectNitroBtn.addEventListener("click", () => startGame("Nitro"));
 selectZeniaBtn.addEventListener("click", () => startGame("Zenia"));
+
+volumeSlider.addEventListener("input", e => {
+  musicVolume = parseFloat(e.target.value);
+});
 
 sprite.onload = () => {
   initGame();
