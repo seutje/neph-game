@@ -213,10 +213,11 @@ function collisionSide(a, b) {
   if (Math.abs(dx) <= width && Math.abs(dy) <= height) {
     const wy = width * dy;
     const hx = height * dx;
+    // Canvas coordinates increase downward, so flip the vertical checks
     if (wy > hx) {
-      return wy > -hx ? "top" : "left";
+      return wy > -hx ? "bottom" : "left";
     } else {
-      return wy > -hx ? "right" : "bottom";
+      return wy > -hx ? "right" : "top";
     }
   }
   return null;
