@@ -46,7 +46,7 @@ const TERRAIN_BLOCK_WIDTH = canvas.width;
 const TERRAIN_BLOCK_HEIGHT = canvas.height - (groundY - SPRITE_PADDING + FRAME_HEIGHT);
 let gaps = [];
 let terrainCursor = 0;
-const GAP_CHANCE = 0.05;
+const GAP_CHANCE = 0.20;
 const MAX_GAP_WIDTH = 100;
 const clouds = [
   { x: 100, y: 60 },
