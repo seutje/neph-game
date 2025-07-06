@@ -11,14 +11,6 @@
   const saveScoreBtn = document.getElementById("saveScoreBtn");
   const pauseOverlay = document.getElementById("pauseOverlay");
   const characterSelectionDiv = document.getElementById("characterSelection");
-  const selectNephBtn = document.getElementById("selectNeph");
-  const selectTurfBtn = document.getElementById("selectTurf");
-  const selectSeugeBtn = document.getElementById("selectSeuge");
-  const selectJerpBtn = document.getElementById("selectJerp");
-  const selectSmonkBtn = document.getElementById("selectSmonk");
-  const selectNitroBtn = document.getElementById("selectNitro");
-  const selectZeniaBtn = document.getElementById("selectZenia");
-  const selectBeercepsBtn = document.getElementById("selectBeerceps");
   const volumeControl = document.getElementById("volumeControl");
   const sfxVolumeSlider = document.getElementById("sfxVolumeSlider");
   const musicVolumeSlider = document.getElementById("musicVolumeSlider");
@@ -680,27 +672,21 @@
     drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
   }
 
-  function positionCharacterButtons() {
-    const rect = canvas.getBoundingClientRect();
-    const startX = rect.left + (canvas.width - (CHAR_BTN_WIDTH * 2 + CHAR_BTN_SPACING)) / 2;
-    const startY = rect.top + 80;
-    const buttons = [
-      selectNephBtn,
-      selectTurfBtn,
-      selectSeugeBtn,
-      selectJerpBtn,
-      selectSmonkBtn,
-      selectNitroBtn,
-      selectZeniaBtn,
-      selectBeercepsBtn
-    ];
-    buttons.forEach((btn, i) => {
+  let characterButtonRects = [];
+
+  function buildCharacterButtonRects() {
+    const startX = (canvas.width - (CHAR_BTN_WIDTH * 2 + CHAR_BTN_SPACING)) / 2;
+    const startY = 80;
+    characterButtonRects = characters.map((name, i) => {
       const col = i % 2;
       const row = Math.floor(i / 2);
-      btn.style.left = startX + col * (CHAR_BTN_WIDTH + CHAR_BTN_SPACING) + "px";
-      btn.style.top = startY + row * (CHAR_BTN_HEIGHT + CHAR_BTN_SPACING) + "px";
-      btn.style.width = CHAR_BTN_WIDTH + "px";
-      btn.style.height = CHAR_BTN_HEIGHT + "px";
+      return {
+        name,
+        x: startX + col * (CHAR_BTN_WIDTH + CHAR_BTN_SPACING),
+        y: startY + row * (CHAR_BTN_HEIGHT + CHAR_BTN_SPACING),
+        width: CHAR_BTN_WIDTH,
+        height: CHAR_BTN_HEIGHT,
+      };
     });
   }
 
@@ -710,18 +696,11 @@
     ctx.fillStyle = "black";
     drawSpriteText("SELECT YOUR CHARACTER", canvas.width / 2, 40, "center");
 
-    const startX = (canvas.width - (CHAR_BTN_WIDTH * 2 + CHAR_BTN_SPACING)) / 2;
-    const startY = 80;
-    const buttons = characters;
-    buttons.forEach((name, i) => {
-      const col = i % 2;
-      const row = Math.floor(i / 2);
-      const x = startX + col * (CHAR_BTN_WIDTH + CHAR_BTN_SPACING);
-      const y = startY + row * (CHAR_BTN_HEIGHT + CHAR_BTN_SPACING);
+    characterButtonRects.forEach(({ name, x, y, width, height }) => {
       ctx.strokeStyle = "black";
-      ctx.strokeRect(x, y, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
-      const textY = y + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT * CHAR_BTN_TEXT_SCALE) / 2;
-      drawSpriteText(name, x + CHAR_BTN_WIDTH / 2, textY, "center", CHAR_BTN_TEXT_SCALE);
+      ctx.strokeRect(x, y, width, height);
+      const textY = y + (height - DRAW_CHAR_HEIGHT * CHAR_BTN_TEXT_SCALE) / 2;
+      drawSpriteText(name, x + width / 2, textY, "center", CHAR_BTN_TEXT_SCALE);
     });
   }
 
@@ -844,7 +823,7 @@
     canvas.style.display = "block";
     volumeControl.style.display = "none";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    positionCharacterButtons();
+    buildCharacterButtonRects();
     startDemo();
   }
 
@@ -1063,14 +1042,26 @@
     nameEntry.style.display = "none";
   });
 
-  selectNephBtn.addEventListener("click", () => startGame("Neph"));
-  selectTurfBtn.addEventListener("click", () => startGame("Turf"));
-  selectSeugeBtn.addEventListener("click", () => startGame("Seuge"));
-  selectJerpBtn.addEventListener("click", () => startGame("Jerp"));
-  selectSmonkBtn.addEventListener("click", () => startGame("Smonk"));
-  selectNitroBtn.addEventListener("click", () => startGame("Nitro"));
-  selectZeniaBtn.addEventListener("click", () => startGame("Zenia"));
-  selectBeercepsBtn.addEventListener("click", () => startGame("Beerceps"));
+  canvas.addEventListener("click", e => {
+    if (characterSelectionDiv.style.display !== "block") {
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    for (const btn of characterButtonRects) {
+      if (
+        x >= btn.x &&
+        x <= btn.x + btn.width &&
+        y >= btn.y &&
+        y <= btn.y + btn.height
+      ) {
+        startGame(btn.name);
+        break;
+      }
+    }
+  });
+
 
   sfxVolumeSlider.addEventListener("input", e => {
     sfxVolume = parseFloat(e.target.value);

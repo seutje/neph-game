@@ -19,19 +19,6 @@ body {
   pointer-events: none;
 }
 
-#characterSelection h2 {
-  display: none;
-}
-
-#characterSelection button {
-  position: absolute;
-  opacity: 0;
-  background: none;
-  border: none;
-  font-size: 10px;
-  pointer-events: auto;
-  padding: 0;
-}
 
 #gameCanvas {
   display: none;
