@@ -7,6 +7,7 @@ canvas {
 
 body {
   position: relative;
+  margin: 0;
 }
 
 #characterSelection {
@@ -15,15 +16,10 @@ body {
   top: 0;
   width: 100%;
   height: 100%;
-  text-align: center;
-  padding-top: 100px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  pointer-events: none;
 }
 
-#characterSelection button {
-  padding: 10px 20px;
-  font-size: 20px;
-}
 
 #gameCanvas {
   display: none;
