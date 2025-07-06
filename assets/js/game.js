@@ -47,14 +47,14 @@
 
   const sprite = new Image();
   const alphabetSprite = new Image();
-  const CHAR_WIDTH = 41;
-  const CHAR_HEIGHT = 41;
+  const CHAR_WIDTH = 43;
+  const CHAR_HEIGHT = 42;
   const CHAR_SCALE = 0.5;
   const DRAW_CHAR_WIDTH = CHAR_WIDTH * CHAR_SCALE;
   const DRAW_CHAR_HEIGHT = CHAR_HEIGHT * CHAR_SCALE;
-  const CHAR_OFFSET_X = 20;
-  const CHAR_OFFSET_Y = 30;
-  const CHAR_COL_PADDING = 4;
+  const CHAR_OFFSET_X = 23;
+  const CHAR_OFFSET_Y = 32;
+  const CHAR_COL_PADDING = 0;
   const CHAR_ROW_PADDING = 8;
   const CHAR_COLS = 6;
   const CHAR_MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
