@@ -14,6 +14,7 @@
   let showVolume = false;
   const SLIDER_HEIGHT = 6;
   const SLIDER_WIDTH = 100;
+  const SLIDER_OFFSET_Y = 20;
   const sliders = {
     sfx: { x: 10, y: 30, width: SLIDER_WIDTH, value: 0.01 },
     music: { x: 10, y: 50, width: SLIDER_WIDTH, value: 0.01 },
@@ -679,11 +680,12 @@
   }
 
   function drawSlider(slider, label) {
+    const sliderY = slider.y + SLIDER_OFFSET_Y;
     ctx.fillStyle = "black";
-    ctx.fillRect(slider.x, slider.y, slider.width, SLIDER_HEIGHT);
+    ctx.fillRect(slider.x, sliderY, slider.width, SLIDER_HEIGHT);
     const handleX = slider.x + (slider.value / 0.1) * slider.width;
     ctx.fillStyle = "white";
-    ctx.fillRect(handleX - 2, slider.y - 2, 4, SLIDER_HEIGHT + 4);
+    ctx.fillRect(handleX - 2, sliderY - 2, 4, SLIDER_HEIGHT + 4);
     ctx.fillStyle = "black";
     ctx.fillText(label, slider.x + slider.width + 5, slider.y + SLIDER_HEIGHT);
   }
@@ -1103,11 +1105,12 @@
     const y = (e.clientY - rect.top) * scaleY;
 
     function sliderHit(slider) {
+      const sliderY = slider.y + SLIDER_OFFSET_Y;
       return (
         x >= slider.x &&
         x <= slider.x + slider.width &&
-        y >= slider.y - 4 &&
-        y <= slider.y + SLIDER_HEIGHT + 4
+        y >= sliderY - 4 &&
+        y <= sliderY + SLIDER_HEIGHT + 4
       );
     }
 
@@ -1158,11 +1161,12 @@
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
     function sliderHit(slider) {
+      const sliderY = slider.y + SLIDER_OFFSET_Y;
       return (
         x >= slider.x &&
         x <= slider.x + slider.width &&
-        y >= slider.y - 4 &&
-        y <= slider.y + SLIDER_HEIGHT + 4
+        y >= sliderY - 4 &&
+        y <= sliderY + SLIDER_HEIGHT + 4
       );
     }
     if (showVolume) {
