@@ -15,6 +15,7 @@ test('game.js runs without errors', () => {
     fillRect: () => {},
     clearRect: () => {},
     drawImage: () => {},
+    fillText: () => {},
     beginPath: () => {},
     arc: () => {},
     fill: () => {},

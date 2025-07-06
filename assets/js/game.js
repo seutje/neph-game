@@ -46,6 +46,63 @@
   const BASE_SPAWN_INTERVAL = 120;
 
   const sprite = new Image();
+  const alphabetSprite = new Image();
+  const CHAR_WIDTH = 43;
+  const CHAR_HEIGHT = 42;
+  const CHAR_SCALE = 0.5;
+  const DRAW_CHAR_WIDTH = CHAR_WIDTH * CHAR_SCALE;
+  const DRAW_CHAR_HEIGHT = CHAR_HEIGHT * CHAR_SCALE;
+  const CHAR_OFFSET_X = 23;
+  const CHAR_OFFSET_Y = 32;
+  const CHAR_COL_PADDING = 0;
+  const CHAR_ROW_PADDING = 8;
+  const CHAR_COLS = 6;
+  const CHAR_MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  function drawSpriteText(text, x, y, align = "left") {
+    text = String(text).toUpperCase();
+    let width = 0;
+    for (const ch of text) {
+      width += ch === " " ? DRAW_CHAR_WIDTH / 2 : DRAW_CHAR_WIDTH;
+    }
+    if (align === "center") {
+      x -= width / 2;
+    } else if (align === "right") {
+      x -= width;
+    }
+    ctx.font = `${DRAW_CHAR_HEIGHT}px Arial`;
+    ctx.textBaseline = "top";
+    for (const ch of text) {
+      if (ch === " ") {
+        x += DRAW_CHAR_WIDTH / 2;
+        continue;
+      }
+      const idx = CHAR_MAP.indexOf(ch);
+      if (idx === -1) {
+        ctx.fillText(ch, Math.round(x), y);
+        x += DRAW_CHAR_WIDTH;
+        continue;
+      }
+      const col = idx % CHAR_COLS;
+      const row = Math.floor(idx / CHAR_COLS);
+      const sx =
+        CHAR_OFFSET_X + col * (CHAR_WIDTH + CHAR_COL_PADDING);
+      const sy =
+        CHAR_OFFSET_Y + row * (CHAR_HEIGHT + CHAR_ROW_PADDING);
+      ctx.drawImage(
+        alphabetSprite,
+        sx,
+        sy,
+        CHAR_WIDTH,
+        CHAR_HEIGHT,
+        Math.round(x),
+        y,
+        DRAW_CHAR_WIDTH,
+        DRAW_CHAR_HEIGHT
+      );
+      x += DRAW_CHAR_WIDTH;
+    }
+  }
   const FRAME_WIDTH = 70;
   const FRAME_HEIGHT = 90;
   const SPRITE_PADDING = 13;
@@ -603,16 +660,12 @@
   }
   function drawScore() {
     ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    ctx.textAlign = "left";
-    ctx.fillText("Score: " + score, 10, 20);
+    drawSpriteText("SCORE: " + score, 10, 10, "left");
   }
 
   function drawHealth() {
     ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    ctx.textAlign = "right";
-    ctx.fillText("Health: " + health, canvas.width - 10, 20);
+    drawSpriteText("HEALTH: " + health, canvas.width - 10, 10, "right");
   }
 
   function updateClouds() {
@@ -677,11 +730,8 @@
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "white";
-    ctx.font = "40px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("Game Over", canvas.width / 2, 40);
-    ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, canvas.width / 2, 80);
+    drawSpriteText("GAME OVER", canvas.width / 2, 40, "center");
+    drawSpriteText("SCORE: " + score, canvas.width / 2, 80, "center");
     resetBtn.style.display = "block";
     scoreContainer.style.display = "block";
     renderHighScores();
@@ -974,17 +1024,25 @@
 
   function preload() {
     let loaded = 0;
+    const total = characters.length + 1;
     for (const char of characters) {
       const img = new Image();
       img.src = `assets/images/sprite-${char.toLowerCase()}.png`;
       img.onload = () => {
         loaded++;
-        if (loaded === characters.length) {
+        if (loaded === total) {
           showCharacterSelection();
         }
       };
       spriteCache[char.toLowerCase()] = img;
     }
+    alphabetSprite.src = "assets/images/sprite-alphabet.png";
+    alphabetSprite.onload = () => {
+      loaded++;
+      if (loaded === total) {
+        showCharacterSelection();
+      }
+    };
   }
 
   Game.rectsOverlap = rectsOverlap;
