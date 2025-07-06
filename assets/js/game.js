@@ -717,17 +717,22 @@
     const inputHeight = 20;
     const inputX = (canvas.width - inputWidth) / 2;
     const inputY = 250;
-    ctx.strokeStyle = "white";
-    ctx.strokeRect(inputX, inputY, inputWidth, inputHeight);
     ctx.fillStyle = "white";
+    ctx.fillRect(inputX, inputY, inputWidth, inputHeight);
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(inputX, inputY, inputWidth, inputHeight);
+    ctx.fillStyle = "black";
     drawSpriteText(enteredName || "_", inputX + 4, inputY + 4, "left", 0.5);
 
-    const btnX = (canvas.width - CHAR_BTN_WIDTH) / 2;
+    const btnWidth = 210;
+    const btnHeight = CHAR_BTN_HEIGHT;
+    const btnX = (canvas.width - btnWidth) / 2;
     const btnY = inputY + inputHeight + 10;
-    const textY = btnY + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT) / 2;
-    drawSpriteText("SAVE SCORE", btnX + CHAR_BTN_WIDTH / 2, textY, "center");
-    ctx.strokeRect(btnX, btnY, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
-    saveScoreButtonRect = { x: btnX, y: btnY, width: CHAR_BTN_WIDTH, height: CHAR_BTN_HEIGHT };
+    const textY = btnY + (btnHeight - DRAW_CHAR_HEIGHT) / 2;
+    drawSpriteText("SAVE SCORE", btnX + btnWidth / 2, textY, "center");
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
+    saveScoreButtonRect = { x: btnX, y: btnY, width: btnWidth, height: btnHeight };
   }
 
   function drawGameOverScreen(scores) {
