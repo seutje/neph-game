@@ -47,6 +47,7 @@
 
   const sprite = new Image();
   const alphabetSprite = new Image();
+  const numbersSprite = new Image();
   const CHAR_WIDTH = 43;
   const CHAR_HEIGHT = 42;
   const CHAR_SCALE = 0.5;
@@ -58,6 +59,7 @@
   const CHAR_ROW_PADDING = 8;
   const CHAR_COLS = 6;
   const CHAR_MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const NUMBER_MAP = "0123456789".split("");
 
   function drawSpriteText(text, x, y, align = "left") {
     text = String(text).toUpperCase();
@@ -77,20 +79,23 @@
         x += DRAW_CHAR_WIDTH / 2;
         continue;
       }
-      const idx = CHAR_MAP.indexOf(ch);
+      let idx = CHAR_MAP.indexOf(ch);
+      let spriteImg = alphabetSprite;
       if (idx === -1) {
-        ctx.fillText(ch, Math.round(x), y);
-        x += DRAW_CHAR_WIDTH;
-        continue;
+        idx = NUMBER_MAP.indexOf(ch);
+        if (idx === -1) {
+          ctx.fillText(ch, Math.round(x), y);
+          x += DRAW_CHAR_WIDTH;
+          continue;
+        }
+        spriteImg = numbersSprite;
       }
       const col = idx % CHAR_COLS;
       const row = Math.floor(idx / CHAR_COLS);
-      const sx =
-        CHAR_OFFSET_X + col * (CHAR_WIDTH + CHAR_COL_PADDING);
-      const sy =
-        CHAR_OFFSET_Y + row * (CHAR_HEIGHT + CHAR_ROW_PADDING);
+      const sx = CHAR_OFFSET_X + col * (CHAR_WIDTH + CHAR_COL_PADDING);
+      const sy = CHAR_OFFSET_Y + row * (CHAR_HEIGHT + CHAR_ROW_PADDING);
       ctx.drawImage(
-        alphabetSprite,
+        spriteImg,
         sx,
         sy,
         CHAR_WIDTH,
@@ -1024,7 +1029,7 @@
 
   function preload() {
     let loaded = 0;
-    const total = characters.length + 1;
+    const total = characters.length + 2;
     for (const char of characters) {
       const img = new Image();
       img.src = `assets/images/sprite-${char.toLowerCase()}.png`;
@@ -1038,6 +1043,13 @@
     }
     alphabetSprite.src = "assets/images/sprite-alphabet.png";
     alphabetSprite.onload = () => {
+      loaded++;
+      if (loaded === total) {
+        showCharacterSelection();
+      }
+    };
+    numbersSprite.src = "assets/images/sprite-numbers.png";
+    numbersSprite.onload = () => {
       loaded++;
       if (loaded === total) {
         showCharacterSelection();
