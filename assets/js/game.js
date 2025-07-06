@@ -3,14 +3,12 @@
 
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
-  const resetBtn = document.getElementById("resetBtn");
-  const scoreContainer = document.getElementById("scoreContainer");
-  const highScoreList = document.getElementById("highScoreList");
-  const nameEntry = document.getElementById("nameEntry");
-  const nameInput = document.getElementById("nameInput");
-  const saveScoreBtn = document.getElementById("saveScoreBtn");
   const pauseOverlay = document.getElementById("pauseOverlay");
-  const characterSelectionDiv = document.getElementById("characterSelection");
+  let characterSelectionVisible = false;
+  let awaitingNameEntry = false;
+  let enteredName = "";
+  let saveScoreButtonRect = null;
+  let gameOverScores = [];
   let showVolume = false;
   const SLIDER_HEIGHT = 6;
   const SLIDER_WIDTH = 100;
@@ -606,6 +604,20 @@
 
   const keys = {};
   document.addEventListener("keydown", e => {
+    if (awaitingNameEntry) {
+      if (e.key === "Backspace") {
+        enteredName = enteredName.slice(0, -1);
+      } else if (e.key === "Enter") {
+        saveEnteredScore();
+      } else if (e.key.length === 1) {
+        enteredName += e.key;
+        if (enteredName.length > 24) {
+          enteredName = enteredName.slice(0, 24);
+        }
+      }
+      drawGameOverScreen(gameOverScores);
+      return;
+    }
     if (e.key.toLowerCase() === "p") {
       if (!gameOver) {
         paused = !paused;
@@ -630,6 +642,7 @@
     }
   });
   document.addEventListener("keyup", e => {
+    if (awaitingNameEntry) return;
     keys[e.key] = false;
   });
 
@@ -657,12 +670,6 @@
     if (enemyAhead && !player.attacking) {
       player.attack();
     }
-  }
-
-  function renderHighScores() {
-    const scores = loadHighScores();
-    highScoreList.innerHTML = scores.map(s => `<li>${s.name} ${s.score}</li>`).join("");
-    return scores;
   }
 
   function qualifiesForHighScore(s) {
@@ -705,6 +712,29 @@
     });
   }
 
+  function drawNameEntry() {
+    const inputWidth = 160;
+    const inputHeight = 20;
+    const inputX = (canvas.width - inputWidth) / 2;
+    const inputY = 250;
+    ctx.fillStyle = "white";
+    ctx.fillRect(inputX, inputY, inputWidth, inputHeight);
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(inputX, inputY, inputWidth, inputHeight);
+    ctx.fillStyle = "black";
+    drawSpriteText(enteredName || "_", inputX + 4, inputY + 4, "left", 0.5);
+
+    const btnWidth = 210;
+    const btnHeight = CHAR_BTN_HEIGHT;
+    const btnX = (canvas.width - btnWidth) / 2;
+    const btnY = inputY + inputHeight + 10;
+    const textY = btnY + (btnHeight - DRAW_CHAR_HEIGHT) / 2;
+    drawSpriteText("SAVE SCORE", btnX + btnWidth / 2, textY, "center");
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
+    saveScoreButtonRect = { x: btnX, y: btnY, width: btnWidth, height: btnHeight };
+  }
+
   function drawGameOverScreen(scores) {
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -712,6 +742,9 @@
     drawSpriteText("GAME OVER", canvas.width / 2, 40, "center");
     drawSpriteText("SCORE " + score, canvas.width / 2, 80, "center");
     drawHighScoresCanvas(scores);
+    if (awaitingNameEntry) {
+      drawNameEntry();
+    }
     const btnX = (canvas.width - CHAR_BTN_WIDTH) / 2;
     const btnY = canvas.height - CHAR_BTN_HEIGHT - 10;
     const textY = btnY + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT) / 2;
@@ -813,28 +846,27 @@
   function showGameOver() {
     stopBackgroundMusic();
     playDeathSound();
-    const scores = renderHighScores();
-    drawGameOverScreen(scores);
-    resetBtn.style.display = "none";
-    const heading = scoreContainer.querySelector("h2");
-    if (heading) heading.style.display = "none";
-    highScoreList.style.display = "none";
-    if (qualifiesForHighScore(score)) {
-      scoreContainer.style.display = "block";
-      nameEntry.style.display = "block";
-      nameInput.value = selectedCharacter;
-    } else {
-      nameEntry.style.display = "none";
-      scoreContainer.style.display = "none";
+    gameOverScores = loadHighScores();
+    awaitingNameEntry = qualifiesForHighScore(score);
+    if (awaitingNameEntry) {
+      enteredName = selectedCharacter;
     }
+    drawGameOverScreen(gameOverScores);
+  }
+
+  function saveEnteredScore() {
+    const name = enteredName.substring(0, 24) || "Anonymous";
+    gameOverScores.push({ name, score });
+    gameOverScores.sort((a, b) => b.score - a.score);
+    gameOverScores = gameOverScores.slice(0, MAX_HIGH_SCORES);
+    saveHighScores(gameOverScores);
+    awaitingNameEntry = false;
+    drawGameOverScreen(gameOverScores);
   }
 
   function resetGame() {
     worldSpeed = 0;
     gameStartTime = Date.now();
-    resetBtn.style.display = "none";
-    scoreContainer.style.display = "none";
-    nameEntry.style.display = "none";
     restartButtonRect = null;
     stopBackgroundMusic();
     showCharacterSelection();
@@ -862,15 +894,12 @@
     player.touchingLeft = false;
     initTerrain();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    resetBtn.style.display = "none";
-    scoreContainer.style.display = "none";
-    nameEntry.style.display = "none";
     gameLoop();
   }
 
   function showCharacterSelection() {
     cancelAnimationFrame(animationId);
-    characterSelectionDiv.style.display = "block";
+    characterSelectionVisible = true;
     canvas.style.display = "block";
     showVolume = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -884,7 +913,7 @@
     const spritePath = `assets/images/sprite-${character.toLowerCase()}.png`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
-    characterSelectionDiv.style.display = "none";
+    characterSelectionVisible = false;
     canvas.style.display = "block";
     showVolume = true;
     sliders.sfx.value = sfxVolume;
@@ -1069,7 +1098,7 @@
     drawHealth();
     drawVolumeSliders();
 
-    if (characterSelectionDiv.style.display === "block") {
+    if (characterSelectionVisible) {
       drawCharacterMenu();
     }
 
@@ -1085,17 +1114,6 @@
     }
   }
 
-  saveScoreBtn.addEventListener("click", () => {
-    const name = nameInput.value.substring(0, 24) || "Anonymous";
-    let scores = loadHighScores();
-    scores.push({ name, score });
-    scores.sort((a, b) => b.score - a.score);
-    scores = scores.slice(0, MAX_HIGH_SCORES);
-    saveHighScores(scores);
-    renderHighScores();
-    nameEntry.style.display = "none";
-    drawGameOverScreen(scores);
-  });
 
   canvas.addEventListener("click", e => {
     const rect = canvas.getBoundingClientRect();
@@ -1114,6 +1132,18 @@
       );
     }
 
+    if (awaitingNameEntry && saveScoreButtonRect) {
+      if (
+        x >= saveScoreButtonRect.x &&
+        x <= saveScoreButtonRect.x + saveScoreButtonRect.width &&
+        y >= saveScoreButtonRect.y &&
+        y <= saveScoreButtonRect.y + saveScoreButtonRect.height
+      ) {
+        saveEnteredScore();
+        return;
+      }
+    }
+
     if (showVolume) {
       if (sliderHit(sliders.sfx)) {
         sliders.sfx.value = ((x - sliders.sfx.x) / sliders.sfx.width) * 0.1;
@@ -1127,7 +1157,7 @@
       }
     }
 
-    if (characterSelectionDiv.style.display === "block") {
+    if (characterSelectionVisible) {
       for (const btn of characterButtonRects) {
         if (
           x >= btn.x &&
