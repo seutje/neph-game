@@ -53,7 +53,7 @@
   const CHAR_MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   const NUMBER_MAP = "0123456789".split("");
 
-  const CHAR_BTN_WIDTH = 100;
+  const CHAR_BTN_WIDTH = 160;
   const CHAR_BTN_HEIGHT = 30;
   const CHAR_BTN_SPACING = 10;
   const CHAR_BTN_TEXT_SCALE = 0.5;
@@ -655,7 +655,8 @@
 
   function renderHighScores() {
     const scores = loadHighScores();
-    highScoreList.innerHTML = scores.map(s => `<li>${s.name}: ${s.score}</li>`).join("");
+    highScoreList.innerHTML = scores.map(s => `<li>${s.name} ${s.score}</li>`).join("");
+    return scores;
   }
 
   function qualifiesForHighScore(s) {
@@ -672,6 +673,32 @@
     drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
   }
 
+  function drawHighScoresCanvas(scores = loadHighScores()) {
+    ctx.fillStyle = "white";
+    drawSpriteText("HIGH SCORES", canvas.width / 2, 120, "center");
+    scores.forEach((s, i) => {
+      const y = 150 + i * 25;
+      drawSpriteText(`${s.name} ${s.score}`, canvas.width / 2, y, "center");
+    });
+  }
+
+  function drawGameOverScreen(scores) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";
+    drawSpriteText("GAME OVER", canvas.width / 2, 40, "center");
+    drawSpriteText("SCORE " + score, canvas.width / 2, 80, "center");
+    drawHighScoresCanvas(scores);
+    const btnX = (canvas.width - CHAR_BTN_WIDTH) / 2;
+    const btnY = canvas.height - CHAR_BTN_HEIGHT - 10;
+    const textY = btnY + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT) / 2;
+    drawSpriteText("RESTART", btnX + CHAR_BTN_WIDTH / 2, textY, "center");
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(btnX, btnY, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
+    restartButtonRect = { x: btnX, y: btnY, width: CHAR_BTN_WIDTH, height: CHAR_BTN_HEIGHT };
+  }
+
+  let restartButtonRect = null;
   let characterButtonRects = [];
 
   function buildCharacterButtonRects() {
@@ -763,19 +790,19 @@
   function showGameOver() {
     stopBackgroundMusic();
     playDeathSound();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-    drawSpriteText("GAME OVER", canvas.width / 2, 40, "center");
-    drawSpriteText("SCORE " + score, canvas.width / 2, 80, "center");
-    resetBtn.style.display = "block";
-    scoreContainer.style.display = "block";
-    renderHighScores();
+    const scores = renderHighScores();
+    drawGameOverScreen(scores);
+    resetBtn.style.display = "none";
+    const heading = scoreContainer.querySelector("h2");
+    if (heading) heading.style.display = "none";
+    highScoreList.style.display = "none";
     if (qualifiesForHighScore(score)) {
+      scoreContainer.style.display = "block";
       nameEntry.style.display = "block";
       nameInput.value = selectedCharacter;
     } else {
       nameEntry.style.display = "none";
+      scoreContainer.style.display = "none";
     }
   }
 
@@ -785,6 +812,7 @@
     resetBtn.style.display = "none";
     scoreContainer.style.display = "none";
     nameEntry.style.display = "none";
+    restartButtonRect = null;
     stopBackgroundMusic();
     showCharacterSelection();
   }
@@ -1030,7 +1058,6 @@
     }
   }
 
-  resetBtn.addEventListener("click", resetGame);
   saveScoreBtn.addEventListener("click", () => {
     const name = nameInput.value.substring(0, 24) || "Anonymous";
     let scores = loadHighScores();
@@ -1040,27 +1067,40 @@
     saveHighScores(scores);
     renderHighScores();
     nameEntry.style.display = "none";
+    drawGameOverScreen(scores);
   });
 
   canvas.addEventListener("click", e => {
-    if (characterSelectionDiv.style.display !== "block") {
-      return;
-    }
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
-    for (const btn of characterButtonRects) {
-      if (
-        x >= btn.x &&
-        x <= btn.x + btn.width &&
-        y >= btn.y &&
-        y <= btn.y + btn.height
-      ) {
-        startGame(btn.name);
-        break;
+
+    if (characterSelectionDiv.style.display === "block") {
+      for (const btn of characterButtonRects) {
+        if (
+          x >= btn.x &&
+          x <= btn.x + btn.width &&
+          y >= btn.y &&
+          y <= btn.y + btn.height
+        ) {
+          startGame(btn.name);
+          break;
+        }
       }
+      return;
+    }
+
+    if (
+      gameOver &&
+      restartButtonRect &&
+      x >= restartButtonRect.x &&
+      x <= restartButtonRect.x + restartButtonRect.width &&
+      y >= restartButtonRect.y &&
+      y <= restartButtonRect.y + restartButtonRect.height
+    ) {
+      resetGame();
     }
   });
 
