@@ -14,6 +14,7 @@ function loadGameDom() {
     fillRect: () => {},
     clearRect: () => {},
     drawImage: () => {},
+    fillText: () => {},
     beginPath: () => {},
     arc: () => {},
     fill: () => {},
