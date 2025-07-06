@@ -53,7 +53,7 @@
   const CHAR_MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   const NUMBER_MAP = "0123456789".split("");
 
-  const CHAR_BTN_WIDTH = 100;
+  const CHAR_BTN_WIDTH = 160;
   const CHAR_BTN_HEIGHT = 30;
   const CHAR_BTN_SPACING = 10;
   const CHAR_BTN_TEXT_SCALE = 0.5;
@@ -792,6 +792,9 @@
     drawGameOverScreen(scores);
     resetBtn.style.display = "block";
     resetBtn.style.opacity = 0;
+    resetBtn.style.width = CHAR_BTN_WIDTH + "px";
+    resetBtn.style.height = CHAR_BTN_HEIGHT + "px";
+    resetBtn.style.padding = 0;
     const heading = scoreContainer.querySelector("h2");
     if (heading) heading.style.display = "none";
     highScoreList.style.display = "none";
