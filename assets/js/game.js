@@ -49,6 +49,9 @@
   const alphabetSprite = new Image();
   const CHAR_WIDTH = 41;
   const CHAR_HEIGHT = 41;
+  const CHAR_SCALE = 0.5;
+  const DRAW_CHAR_WIDTH = CHAR_WIDTH * CHAR_SCALE;
+  const DRAW_CHAR_HEIGHT = CHAR_HEIGHT * CHAR_SCALE;
   const CHAR_OFFSET_X = 20;
   const CHAR_OFFSET_Y = 30;
   const CHAR_COL_PADDING = 4;
@@ -60,24 +63,24 @@
     text = String(text).toUpperCase();
     let width = 0;
     for (const ch of text) {
-      width += ch === " " ? CHAR_WIDTH / 2 : CHAR_WIDTH;
+      width += ch === " " ? DRAW_CHAR_WIDTH / 2 : DRAW_CHAR_WIDTH;
     }
     if (align === "center") {
       x -= width / 2;
     } else if (align === "right") {
       x -= width;
     }
-    ctx.font = `${CHAR_HEIGHT}px Arial`;
+    ctx.font = `${DRAW_CHAR_HEIGHT}px Arial`;
     ctx.textBaseline = "top";
     for (const ch of text) {
       if (ch === " ") {
-        x += CHAR_WIDTH / 2;
+        x += DRAW_CHAR_WIDTH / 2;
         continue;
       }
       const idx = CHAR_MAP.indexOf(ch);
       if (idx === -1) {
         ctx.fillText(ch, Math.round(x), y);
-        x += CHAR_WIDTH;
+        x += DRAW_CHAR_WIDTH;
         continue;
       }
       const col = idx % CHAR_COLS;
@@ -94,10 +97,10 @@
         CHAR_HEIGHT,
         Math.round(x),
         y,
-        CHAR_WIDTH,
-        CHAR_HEIGHT
+        DRAW_CHAR_WIDTH,
+        DRAW_CHAR_HEIGHT
       );
-      x += CHAR_WIDTH;
+      x += DRAW_CHAR_WIDTH;
     }
   }
   const FRAME_WIDTH = 70;
