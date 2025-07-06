@@ -11,9 +11,15 @@
   const saveScoreBtn = document.getElementById("saveScoreBtn");
   const pauseOverlay = document.getElementById("pauseOverlay");
   const characterSelectionDiv = document.getElementById("characterSelection");
-  const volumeControl = document.getElementById("volumeControl");
-  const sfxVolumeSlider = document.getElementById("sfxVolumeSlider");
-  const musicVolumeSlider = document.getElementById("musicVolumeSlider");
+  let showVolume = false;
+  const SLIDER_HEIGHT = 6;
+  const SLIDER_WIDTH = 100;
+  const SLIDER_OFFSET_Y = 10;
+  const sliders = {
+    sfx: { x: 10, y: 30, width: SLIDER_WIDTH, value: 0.01 },
+    music: { x: 10, y: 50, width: SLIDER_WIDTH, value: 0.01 },
+  };
+  let draggingSlider = null;
   let selectedCharacter = "Neph";
   let autoplaying = false;
   function audioEnabled() {
@@ -673,6 +679,23 @@
     drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
   }
 
+  function drawSlider(slider, label) {
+    const sliderY = slider.y + SLIDER_OFFSET_Y;
+    ctx.fillStyle = "black";
+    ctx.fillRect(slider.x, sliderY, slider.width, SLIDER_HEIGHT);
+    const handleX = slider.x + (slider.value / 0.1) * slider.width;
+    ctx.fillStyle = "white";
+    ctx.fillRect(handleX - 2, sliderY - 2, 4, SLIDER_HEIGHT + 4);
+    ctx.fillStyle = "black";
+    ctx.fillText(label, slider.x + slider.width + 5, slider.y + SLIDER_HEIGHT);
+  }
+
+  function drawVolumeSliders() {
+    if (!showVolume) return;
+    drawSlider(sliders.sfx, "SFX");
+    drawSlider(sliders.music, "MUSIC");
+  }
+
   function drawHighScoresCanvas(scores = loadHighScores()) {
     ctx.fillStyle = "white";
     drawSpriteText("HIGH SCORES", canvas.width / 2, 120, "center");
@@ -849,7 +872,7 @@
     cancelAnimationFrame(animationId);
     characterSelectionDiv.style.display = "block";
     canvas.style.display = "block";
-    volumeControl.style.display = "none";
+    showVolume = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     buildCharacterButtonRects();
     startDemo();
@@ -863,7 +886,9 @@
     sprite.src = spritePath;
     characterSelectionDiv.style.display = "none";
     canvas.style.display = "block";
-    volumeControl.style.display = "flex";
+    showVolume = true;
+    sliders.sfx.value = sfxVolume;
+    sliders.music.value = musicVolume;
     autoplaying = false;
     // Reset timing so regular play always begins at base speed
     gameStartTime = Date.now();
@@ -884,6 +909,7 @@
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
     autoplaying = true;
+    showVolume = false;
     stopBackgroundMusic();
     // Reset time tracking so world speed starts from the baseline
     gameStartTime = Date.now();
@@ -1041,6 +1067,7 @@
 
     drawScore();
     drawHealth();
+    drawVolumeSliders();
 
     if (characterSelectionDiv.style.display === "block") {
       drawCharacterMenu();
@@ -1077,6 +1104,29 @@
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
 
+    function sliderHit(slider) {
+      const sliderY = slider.y + SLIDER_OFFSET_Y;
+      return (
+        x >= slider.x &&
+        x <= slider.x + slider.width &&
+        y >= sliderY - 4 &&
+        y <= sliderY + SLIDER_HEIGHT + 4
+      );
+    }
+
+    if (showVolume) {
+      if (sliderHit(sliders.sfx)) {
+        sliders.sfx.value = ((x - sliders.sfx.x) / sliders.sfx.width) * 0.1;
+        sfxVolume = sliders.sfx.value;
+        return;
+      }
+      if (sliderHit(sliders.music)) {
+        sliders.music.value = ((x - sliders.music.x) / sliders.music.width) * 0.1;
+        musicVolume = sliders.music.value;
+        return;
+      }
+    }
+
     if (characterSelectionDiv.style.display === "block") {
       for (const btn of characterButtonRects) {
         if (
@@ -1104,14 +1154,53 @@
     }
   });
 
-
-  sfxVolumeSlider.addEventListener("input", e => {
-    sfxVolume = parseFloat(e.target.value);
+  canvas.addEventListener("mousedown", e => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    function sliderHit(slider) {
+      const sliderY = slider.y + SLIDER_OFFSET_Y;
+      return (
+        x >= slider.x &&
+        x <= slider.x + slider.width &&
+        y >= sliderY - 4 &&
+        y <= sliderY + SLIDER_HEIGHT + 4
+      );
+    }
+    if (showVolume) {
+      if (sliderHit(sliders.sfx)) {
+        draggingSlider = sliders.sfx;
+        draggingSlider.value = ((x - draggingSlider.x) / draggingSlider.width) * 0.1;
+        sfxVolume = draggingSlider.value;
+      } else if (sliderHit(sliders.music)) {
+        draggingSlider = sliders.music;
+        draggingSlider.value = ((x - draggingSlider.x) / draggingSlider.width) * 0.1;
+        musicVolume = draggingSlider.value;
+      }
+    }
   });
 
-  musicVolumeSlider.addEventListener("input", e => {
-    musicVolume = parseFloat(e.target.value);
+  canvas.addEventListener("mousemove", e => {
+    if (!draggingSlider) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const x = (e.clientX - rect.left) * scaleX;
+    draggingSlider.value = ((x - draggingSlider.x) / draggingSlider.width) * 0.1;
+    draggingSlider.value = Math.max(0, Math.min(0.1, draggingSlider.value));
+    if (draggingSlider === sliders.sfx) {
+      sfxVolume = draggingSlider.value;
+    } else {
+      musicVolume = draggingSlider.value;
+    }
   });
+
+  document.addEventListener("mouseup", () => {
+    draggingSlider = null;
+  });
+
+
 
   sprite.onload = () => {
     initGame();

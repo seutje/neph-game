@@ -78,21 +78,3 @@ body {
   text-align: center;
 }
 
-#volumeControl {
-  position: absolute;
-  top: 30px;
-  left: 10px;
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-}
-
-#volumeControl .volumeRow {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-#volumeControl input[type="range"] {
-  width: 100px;
-}
