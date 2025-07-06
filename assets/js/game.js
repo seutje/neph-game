@@ -603,6 +603,12 @@
   }
 
   const keys = {};
+
+  function resetKeys() {
+    for (const k in keys) {
+      keys[k] = false;
+    }
+  }
   document.addEventListener("keydown", e => {
     if (awaitingNameEntry) {
       if (e.key === "Backspace") {
@@ -921,6 +927,7 @@
     sliders.sfx.value = sfxVolume;
     sliders.music.value = musicVolume;
     autoplaying = false;
+    resetKeys();
     // Reset timing so regular play always begins at base speed
     gameStartTime = Date.now();
     worldSpeed = 0;
@@ -941,6 +948,7 @@
     sprite.src = spritePath;
     autoplaying = true;
     showVolume = false;
+    resetKeys();
     stopBackgroundMusic();
     // Reset time tracking so world speed starts from the baseline
     gameStartTime = Date.now();
