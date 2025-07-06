@@ -61,6 +61,10 @@
   const CHAR_MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   const NUMBER_MAP = "0123456789".split("");
 
+  const CHAR_BTN_WIDTH = 100;
+  const CHAR_BTN_HEIGHT = 30;
+  const CHAR_BTN_SPACING = 10;
+
   function drawSpriteText(text, x, y, align = "left") {
     text = String(text).toUpperCase();
     let width = 0;
@@ -673,6 +677,50 @@
     drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
   }
 
+  function positionCharacterButtons() {
+    const rect = canvas.getBoundingClientRect();
+    const startX = rect.left + (canvas.width - (CHAR_BTN_WIDTH * 2 + CHAR_BTN_SPACING)) / 2;
+    const startY = rect.top + 80;
+    const buttons = [
+      selectNephBtn,
+      selectTurfBtn,
+      selectSeugeBtn,
+      selectJerpBtn,
+      selectSmonkBtn,
+      selectNitroBtn,
+      selectZeniaBtn,
+      selectBeercepsBtn
+    ];
+    buttons.forEach((btn, i) => {
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      btn.style.left = startX + col * (CHAR_BTN_WIDTH + CHAR_BTN_SPACING) + "px";
+      btn.style.top = startY + row * (CHAR_BTN_HEIGHT + CHAR_BTN_SPACING) + "px";
+      btn.style.width = CHAR_BTN_WIDTH + "px";
+      btn.style.height = CHAR_BTN_HEIGHT + "px";
+    });
+  }
+
+  function drawCharacterMenu() {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "black";
+    drawSpriteText("SELECT YOUR CHARACTER", canvas.width / 2, 40, "center");
+
+    const startX = (canvas.width - (CHAR_BTN_WIDTH * 2 + CHAR_BTN_SPACING)) / 2;
+    const startY = 80;
+    const buttons = characters;
+    buttons.forEach((name, i) => {
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const x = startX + col * (CHAR_BTN_WIDTH + CHAR_BTN_SPACING);
+      const y = startY + row * (CHAR_BTN_HEIGHT + CHAR_BTN_SPACING);
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(x, y, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
+      drawSpriteText(name, x + CHAR_BTN_WIDTH / 2, y + 8, "center");
+    });
+  }
+
   function updateClouds() {
     clouds.forEach(c => {
       c.x -= CLOUD_SPEED;
@@ -792,6 +840,7 @@
     canvas.style.display = "block";
     volumeControl.style.display = "none";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    positionCharacterButtons();
     startDemo();
   }
 
@@ -981,6 +1030,10 @@
 
     drawScore();
     drawHealth();
+
+    if (characterSelectionDiv.style.display === "block") {
+      drawCharacterMenu();
+    }
 
     if (!gameOver) {
       animationId = requestAnimationFrame(gameLoop);
