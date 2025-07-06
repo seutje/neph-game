@@ -689,7 +689,12 @@
     drawSpriteText("GAME OVER", canvas.width / 2, 40, "center");
     drawSpriteText("SCORE " + score, canvas.width / 2, 80, "center");
     drawHighScoresCanvas(scores);
-    drawSpriteText("RESTART", canvas.width / 2, canvas.height - 40, "center");
+    const btnX = (canvas.width - CHAR_BTN_WIDTH) / 2;
+    const btnY = canvas.height - CHAR_BTN_HEIGHT - 10;
+    const textY = btnY + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT) / 2;
+    drawSpriteText("RESTART", btnX + CHAR_BTN_WIDTH / 2, textY, "center");
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(btnX, btnY, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
   }
 
   let characterButtonRects = [];
