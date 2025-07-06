@@ -868,6 +868,8 @@
     worldSpeed = 0;
     gameStartTime = Date.now();
     restartButtonRect = null;
+    awaitingNameEntry = false;
+    enteredName = "";
     stopBackgroundMusic();
     showCharacterSelection();
   }
