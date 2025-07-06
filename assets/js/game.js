@@ -665,12 +665,12 @@
   }
   function drawScore() {
     ctx.fillStyle = "black";
-    drawSpriteText("SCORE: " + score, 10, 10, "left");
+    drawSpriteText("SCORE " + score, 10, 10, "left");
   }
 
   function drawHealth() {
     ctx.fillStyle = "black";
-    drawSpriteText("HEALTH: " + health, canvas.width - 10, 10, "right");
+    drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
   }
 
   function updateClouds() {
@@ -736,7 +736,7 @@
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "white";
     drawSpriteText("GAME OVER", canvas.width / 2, 40, "center");
-    drawSpriteText("SCORE: " + score, canvas.width / 2, 80, "center");
+    drawSpriteText("SCORE " + score, canvas.width / 2, 80, "center");
     resetBtn.style.display = "block";
     scoreContainer.style.display = "block";
     renderHighScores();
