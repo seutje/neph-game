@@ -5,6 +5,10 @@
   const ctx = canvas.getContext("2d");
   const pauseOverlay = document.getElementById("pauseOverlay");
   let characterSelectionVisible = false;
+  let awaitingNameEntry = false;
+  let enteredName = "";
+  let saveScoreButtonRect = null;
+  let gameOverScores = [];
   let showVolume = false;
   const SLIDER_HEIGHT = 6;
   const SLIDER_WIDTH = 100;
@@ -600,6 +604,20 @@
 
   const keys = {};
   document.addEventListener("keydown", e => {
+    if (awaitingNameEntry) {
+      if (e.key === "Backspace") {
+        enteredName = enteredName.slice(0, -1);
+      } else if (e.key === "Enter") {
+        saveEnteredScore();
+      } else if (e.key.length === 1) {
+        enteredName += e.key;
+        if (enteredName.length > 24) {
+          enteredName = enteredName.slice(0, 24);
+        }
+      }
+      drawGameOverScreen(gameOverScores);
+      return;
+    }
     if (e.key.toLowerCase() === "p") {
       if (!gameOver) {
         paused = !paused;
@@ -624,6 +642,7 @@
     }
   });
   document.addEventListener("keyup", e => {
+    if (awaitingNameEntry) return;
     keys[e.key] = false;
   });
 
@@ -693,6 +712,24 @@
     });
   }
 
+  function drawNameEntry() {
+    const inputWidth = 160;
+    const inputHeight = 20;
+    const inputX = (canvas.width - inputWidth) / 2;
+    const inputY = 250;
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(inputX, inputY, inputWidth, inputHeight);
+    ctx.fillStyle = "white";
+    drawSpriteText(enteredName || "_", inputX + 4, inputY + 4, "left", 0.5);
+
+    const btnX = (canvas.width - CHAR_BTN_WIDTH) / 2;
+    const btnY = inputY + inputHeight + 10;
+    const textY = btnY + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT) / 2;
+    drawSpriteText("SAVE SCORE", btnX + CHAR_BTN_WIDTH / 2, textY, "center");
+    ctx.strokeRect(btnX, btnY, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
+    saveScoreButtonRect = { x: btnX, y: btnY, width: CHAR_BTN_WIDTH, height: CHAR_BTN_HEIGHT };
+  }
+
   function drawGameOverScreen(scores) {
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -700,6 +737,9 @@
     drawSpriteText("GAME OVER", canvas.width / 2, 40, "center");
     drawSpriteText("SCORE " + score, canvas.width / 2, 80, "center");
     drawHighScoresCanvas(scores);
+    if (awaitingNameEntry) {
+      drawNameEntry();
+    }
     const btnX = (canvas.width - CHAR_BTN_WIDTH) / 2;
     const btnY = canvas.height - CHAR_BTN_HEIGHT - 10;
     const textY = btnY + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT) / 2;
@@ -801,14 +841,22 @@
   function showGameOver() {
     stopBackgroundMusic();
     playDeathSound();
-    let scores = loadHighScores();
-    if (qualifiesForHighScore(score)) {
-      scores.push({ name: selectedCharacter, score });
-      scores.sort((a, b) => b.score - a.score);
-      scores = scores.slice(0, MAX_HIGH_SCORES);
-      saveHighScores(scores);
+    gameOverScores = loadHighScores();
+    awaitingNameEntry = qualifiesForHighScore(score);
+    if (awaitingNameEntry) {
+      enteredName = selectedCharacter;
     }
-    drawGameOverScreen(scores);
+    drawGameOverScreen(gameOverScores);
+  }
+
+  function saveEnteredScore() {
+    const name = enteredName.substring(0, 24) || "Anonymous";
+    gameOverScores.push({ name, score });
+    gameOverScores.sort((a, b) => b.score - a.score);
+    gameOverScores = gameOverScores.slice(0, MAX_HIGH_SCORES);
+    saveHighScores(gameOverScores);
+    awaitingNameEntry = false;
+    drawGameOverScreen(gameOverScores);
   }
 
   function resetGame() {
@@ -1077,6 +1125,18 @@
         y >= sliderY - 4 &&
         y <= sliderY + SLIDER_HEIGHT + 4
       );
+    }
+
+    if (awaitingNameEntry && saveScoreButtonRect) {
+      if (
+        x >= saveScoreButtonRect.x &&
+        x <= saveScoreButtonRect.x + saveScoreButtonRect.width &&
+        y >= saveScoreButtonRect.y &&
+        y <= saveScoreButtonRect.y + saveScoreButtonRect.height
+      ) {
+        saveEnteredScore();
+        return;
+      }
     }
 
     if (showVolume) {
