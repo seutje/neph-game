@@ -753,6 +753,9 @@
     // Reset timing so regular play always begins at base speed
     gameStartTime = Date.now();
     worldSpeed = 0;
+    // Ensure player velocity is cleared when starting real play
+    player.vx = 0;
+    player.vy = 0;
     startBackgroundMusic();
     if (alreadyLoaded) {
       initGame();
@@ -770,6 +773,9 @@
     // Reset time tracking so world speed starts from the baseline
     gameStartTime = Date.now();
     worldSpeed = 0;
+    // Ensure player velocity resets between demo runs
+    player.vx = 0;
+    player.vy = 0;
     if (alreadyLoaded) {
       initGame();
     }
