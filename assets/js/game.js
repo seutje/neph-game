@@ -64,23 +64,26 @@
   const CHAR_BTN_WIDTH = 100;
   const CHAR_BTN_HEIGHT = 30;
   const CHAR_BTN_SPACING = 10;
+  const CHAR_BTN_TEXT_SCALE = 0.5;
 
-  function drawSpriteText(text, x, y, align = "left") {
+  function drawSpriteText(text, x, y, align = "left", scale = 1) {
     text = String(text).toUpperCase();
+    const charWidth = DRAW_CHAR_WIDTH * scale;
+    const charHeight = DRAW_CHAR_HEIGHT * scale;
     let width = 0;
     for (const ch of text) {
-      width += ch === " " ? DRAW_CHAR_WIDTH / 2 : DRAW_CHAR_WIDTH;
+      width += ch === " " ? charWidth / 2 : charWidth;
     }
     if (align === "center") {
       x -= width / 2;
     } else if (align === "right") {
       x -= width;
     }
-    ctx.font = `${DRAW_CHAR_HEIGHT}px Arial`;
+    ctx.font = `${charHeight}px Arial`;
     ctx.textBaseline = "top";
     for (const ch of text) {
       if (ch === " ") {
-        x += DRAW_CHAR_WIDTH / 2;
+        x += charWidth / 2;
         continue;
       }
       let idx = CHAR_MAP.indexOf(ch);
@@ -89,7 +92,7 @@
         idx = NUMBER_MAP.indexOf(ch);
         if (idx === -1) {
           ctx.fillText(ch, Math.round(x), y);
-          x += DRAW_CHAR_WIDTH;
+          x += charWidth;
           continue;
         }
         spriteImg = numbersSprite;
@@ -106,10 +109,10 @@
         CHAR_HEIGHT,
         Math.round(x),
         y,
-        DRAW_CHAR_WIDTH,
-        DRAW_CHAR_HEIGHT
+        charWidth,
+        charHeight
       );
-      x += DRAW_CHAR_WIDTH;
+      x += charWidth;
     }
   }
   const FRAME_WIDTH = 70;
@@ -717,7 +720,8 @@
       const y = startY + row * (CHAR_BTN_HEIGHT + CHAR_BTN_SPACING);
       ctx.strokeStyle = "black";
       ctx.strokeRect(x, y, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
-      drawSpriteText(name, x + CHAR_BTN_WIDTH / 2, y + 8, "center");
+      const textY = y + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT * CHAR_BTN_TEXT_SCALE) / 2;
+      drawSpriteText(name, x + CHAR_BTN_WIDTH / 2, textY, "center", CHAR_BTN_TEXT_SCALE);
     });
   }
 
