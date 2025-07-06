@@ -14,7 +14,7 @@
   let showVolume = false;
   const SLIDER_HEIGHT = 6;
   const SLIDER_WIDTH = 100;
-  const SLIDER_OFFSET_Y = 20;
+  const SLIDER_OFFSET_Y = 10;
   const sliders = {
     sfx: { x: 10, y: 30, width: SLIDER_WIDTH, value: 0.01 },
     music: { x: 10, y: 50, width: SLIDER_WIDTH, value: 0.01 },
