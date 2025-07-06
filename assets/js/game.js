@@ -677,7 +677,7 @@
     ctx.fillStyle = "white";
     drawSpriteText("HIGH SCORES", canvas.width / 2, 120, "center");
     scores.forEach((s, i) => {
-      const y = 150 + i * 20;
+      const y = 150 + i * 25;
       drawSpriteText(`${s.name} ${s.score}`, canvas.width / 2, y, "center");
     });
   }
