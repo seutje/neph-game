@@ -60,6 +60,7 @@
   const sprite2 = new Image();
   const alphabetSprite = new Image();
   const numbersSprite = new Image();
+  const heartSprite = new Image();
   const CHAR_WIDTH = 43;
   const CHAR_HEIGHT = 42;
   const CHAR_SCALE = 0.5;
@@ -197,7 +198,7 @@
       this.x = x;
       this.y = y;
       this.vy = 0;
-      this.radius = 10;
+      this.radius = 20;
       this.createdAt = Date.now();
     }
 
@@ -211,10 +212,7 @@
     }
 
     draw() {
-      ctx.fillStyle = "red";
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.drawImage(heartSprite, this.x - 20, this.y - 20, 40, 40);
     }
   }
   // Factory for player objects controlling character state and behavior
@@ -1247,7 +1245,7 @@
         }
       }
 
-      return now - hp.createdAt < 500;
+      return now - hp.createdAt < 1000;
     });
 
     drawScore();
@@ -1438,7 +1436,7 @@
 
   function preload() {
     let loaded = 0;
-    const total = characters.length + 2;
+    const total = characters.length + 3;
     for (const char of characters) {
       const img = new Image();
       img.src = `assets/images/sprite-${char.toLowerCase()}.png`;
@@ -1459,6 +1457,13 @@
     };
     numbersSprite.src = "assets/images/sprite-numbers.png";
     numbersSprite.onload = () => {
+      loaded++;
+      if (loaded === total) {
+        showCharacterSelection(1);
+      }
+    };
+    heartSprite.src = "assets/images/sprite-heart.png";
+    heartSprite.onload = () => {
       loaded++;
       if (loaded === total) {
         showCharacterSelection(1);
