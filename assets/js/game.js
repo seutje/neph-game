@@ -150,6 +150,16 @@
   let paused = false;
   let autoPaused = false;
 
+  function maybeEndGame() {
+    if (twoPlayerMode) {
+      if (health < 1 && health2 < 1) {
+        gameOver = true;
+      }
+    } else if (health < 1) {
+      gameOver = true;
+    }
+  }
+
   // Web Audio API setup for simple chiptune background music
   let audioCtx;
   let musicInterval;
@@ -399,6 +409,7 @@
         }
       },
       update() {
+        if (getHealth() < 1) return;
         if (this.invincible) {
           this.invincibility--;
           if (this.invincibility <= 0) {
@@ -440,7 +451,8 @@
           }
         }
         if (this.y > canvas.height) {
-          gameOver = true;
+          setHealth(0);
+          maybeEndGame();
         }
         this.x += this.vx + worldSpeed;
         if (this.x < 0) {
@@ -457,6 +469,7 @@
         }
       },
       draw() {
+        if (getHealth() < 1) return;
         let frameY = 0;
         if (this.attacking) {
           frameY = 0;
@@ -511,7 +524,7 @@
           this.jumping = true;
           playDamageSound();
           if (willDie) {
-            gameOver = true;
+            maybeEndGame();
           }
         }
       },
@@ -1200,40 +1213,42 @@
     drawGround();
 
     enemies.forEach(e => {
-      const playerBox = {
-        x: player.x,
-        y: player.y,
-        width: FRAME_WIDTH - SPRITE_PADDING * 3,
-        height: FRAME_HEIGHT - SPRITE_PADDING * 3,
-      };
       const enemyBox = {
         x: e.x,
         y: e.y,
         width: FRAME_WIDTH - SPRITE_PADDING * 3,
         height: FRAME_HEIGHT - SPRITE_PADDING * 3,
       };
-      if (rectsOverlap(playerBox, enemyBox)) {
-        const side = collisionSide(playerBox, enemyBox);
-        if (e.state === "walk") {
-          const stompKill = side === "top" && player.vy > 0;
-          if (player.attacking || stompKill) {
-            e.state = "hit";
-            playEnemyKillSound();
-            score += 1;
-            enemyKillCount++;
-            if (enemyKillCount % 3 === 0) {
-              healthPacks.push(new HealthPack(e.x, e.y));
+      if (health > 0) {
+        const playerBox = {
+          x: player.x,
+          y: player.y,
+          width: FRAME_WIDTH - SPRITE_PADDING * 3,
+          height: FRAME_HEIGHT - SPRITE_PADDING * 3,
+        };
+        if (rectsOverlap(playerBox, enemyBox)) {
+          const side = collisionSide(playerBox, enemyBox);
+          if (e.state === "walk") {
+            const stompKill = side === "top" && player.vy > 0;
+            if (player.attacking || stompKill) {
+              e.state = "hit";
+              playEnemyKillSound();
+              score += 1;
+              enemyKillCount++;
+              if (enemyKillCount % 3 === 0) {
+                healthPacks.push(new HealthPack(e.x, e.y));
+              }
+              if (stompKill) {
+                player.vy = -10;
+                player.jumping = true;
+              }
+            } else if (side !== "top" && !player.attacking && !player.invincible) {
+              player.hit();
             }
-            if (stompKill) {
-              player.vy = -10;
-              player.jumping = true;
-            }
-          } else if (side !== "top" && !player.attacking && !player.invincible) {
-            player.hit();
           }
         }
       }
-      if (twoPlayerMode) {
+      if (twoPlayerMode && health2 > 0) {
         const p2Box = {
           x: player2.x,
           y: player2.y,
@@ -1291,19 +1306,21 @@
         height: hp.radius * 2,
       };
 
-      const p1Box = {
-        x: player.x,
-        y: player.y,
-        width: player.width,
-        height: player.height,
-      };
-      if (rectsOverlap(p1Box, packBox)) {
-        health++;
-        playHealthPackSound();
-        return false;
+      if (health > 0) {
+        const p1Box = {
+          x: player.x,
+          y: player.y,
+          width: player.width,
+          height: player.height,
+        };
+        if (rectsOverlap(p1Box, packBox)) {
+          health++;
+          playHealthPackSound();
+          return false;
+        }
       }
 
-      if (twoPlayerMode) {
+      if (twoPlayerMode && health2 > 0) {
         const p2Box = {
           x: player2.x,
           y: player2.y,
