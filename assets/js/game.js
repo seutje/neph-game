@@ -144,9 +144,10 @@
     { x: 500, y: 50 }
   ];
   let trees = [];
-  const TREE_TRUNK_WIDTH = 10;
-  const TREE_TRUNK_HEIGHT = 20;
-  const TREE_CANOPY_SIZE = 20;
+  // larger decorative trees
+  const TREE_TRUNK_WIDTH = 30;
+  const TREE_TRUNK_HEIGHT = 60;
+  const TREE_CANOPY_SIZE = 60;
   const TREE_MIN_SPACING = 120;
   const TREE_MAX_SPACING = 250;
   const ATTACK_DURATION_FRAMES = 12; // 0.2s at 60fps
