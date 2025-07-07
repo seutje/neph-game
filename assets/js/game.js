@@ -803,6 +803,8 @@
   }
 
   function drawTrees() {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
     trees.forEach(t => {
       const trunkX = t.x - TREE_TRUNK_WIDTH / 2;
       const trunkY = GROUND_SURFACE_Y - TREE_TRUNK_HEIGHT;
@@ -817,6 +819,7 @@
       ctx.strokeStyle = "black";
       ctx.strokeRect(canopyX, canopyY, TREE_CANOPY_SIZE, TREE_CANOPY_SIZE);
     });
+    ctx.restore();
   }
 
   function generateGaps() {
