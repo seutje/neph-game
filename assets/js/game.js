@@ -613,7 +613,13 @@
     ctx.fillStyle = "white";
     ctx.fillRect(handleX - 2, sliderY - 2, 4, SLIDER_HEIGHT + 4);
     ctx.fillStyle = "black";
-    ctx.fillText(label, slider.x + slider.width + 5, slider.y + SLIDER_HEIGHT);
+    drawSpriteText(
+      label,
+      slider.x + slider.width + 5,
+      slider.y + SLIDER_HEIGHT,
+      "left",
+      0.5
+    );
   }
 
   function drawVolumeSliders() {
