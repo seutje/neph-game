@@ -200,19 +200,33 @@
       this.vy = 0;
       this.radius = 20;
       this.createdAt = Date.now();
+      this.picked = false;
+      this.pickupTime = 0;
     }
 
     update() {
-      this.vy += gravity;
-      this.y += this.vy;
-      if (this.y + this.radius > groundY + 75) {
-        this.y = groundY + 75 - this.radius;
-        this.vy = 0;
+      if (this.picked) {
+        this.y += this.vy;
+      } else {
+        this.vy += gravity;
+        this.y += this.vy;
+        if (this.y + this.radius > groundY + 75) {
+          this.y = groundY + 75 - this.radius;
+          this.vy = 0;
+        }
       }
     }
 
     draw() {
-      ctx.drawImage(heartSprite, this.x - 20, this.y - 20, 40, 40);
+      if (this.picked) {
+        const elapsed = Date.now() - this.pickupTime;
+        ctx.save();
+        ctx.globalAlpha = 1 - elapsed / 500;
+        ctx.drawImage(heartSprite, this.x - 20, this.y - 20, 40, 40);
+        ctx.restore();
+      } else {
+        ctx.drawImage(heartSprite, this.x - 20, this.y - 20, 40, 40);
+      }
     }
   }
   // Factory for player objects controlling character state and behavior
@@ -1225,9 +1239,14 @@
           height: player.height,
         };
         if (rectsOverlap(p1Box, packBox)) {
-          health++;
-          Game.playHealthPackSound();
-          return false;
+          if (!hp.picked) {
+            health++;
+            hp.picked = true;
+            hp.pickupTime = now;
+            hp.vy = -2;
+            Game.playHealthPackSound();
+          }
+          return true;
         }
       }
 
@@ -1239,12 +1258,20 @@
           height: player2.height,
         };
         if (rectsOverlap(p2Box, packBox)) {
-          health2++;
-          Game.playHealthPackSound();
-          return false;
+          if (!hp.picked) {
+            health2++;
+            hp.picked = true;
+            hp.pickupTime = now;
+            hp.vy = -2;
+            Game.playHealthPackSound();
+          }
+          return true;
         }
       }
 
+      if (hp.picked) {
+        return now - hp.pickupTime < 500;
+      }
       return now - hp.createdAt < 1000;
     });
 
