@@ -21,6 +21,7 @@
   let selectedCharacter1 = "Neph";
   let selectedCharacter2 = "Turf";
   let selectingPlayer = 1;
+  let twoPlayerSelected = false;
   let autoplaying = false;
   let demoPreserve = false;
   function audioEnabled() {
@@ -866,7 +867,7 @@
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "black";
-    const title = twoPlayerMode
+    const title = twoPlayerSelected
       ? selectingPlayer === 1
         ? "PLAYER 1 SELECT"
         : "PLAYER 2 SELECT"
@@ -1059,7 +1060,7 @@
     showVolume = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     buildCharacterButtonRects();
-    if (twoPlayerMode && playerIndex === 2) {
+    if (twoPlayerSelected && playerIndex === 2) {
       demoPreserve = true;
       return; // keep demo running in the background
     }
@@ -1072,6 +1073,7 @@
     cancelAnimationFrame(animationId);
     selectedCharacter1 = character;
     selectedCharacter2 = character2;
+    twoPlayerMode = twoPlayerSelected;
     const spritePath = `assets/images/sprite-${character.toLowerCase()}.png`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
@@ -1100,6 +1102,7 @@
 
   function startDemo(preserve = false) {
     demoPreserve = preserve;
+    twoPlayerMode = false;
     const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
     if (!demoPreserve) {
       selectedCharacter1 = randomCharacter;
@@ -1418,7 +1421,7 @@
         y >= twoPlayerButtonRect.y &&
         y <= twoPlayerButtonRect.y + twoPlayerButtonRect.height
       ) {
-        twoPlayerMode = !twoPlayerMode;
+        twoPlayerSelected = !twoPlayerSelected;
         return;
       }
       for (const btn of characterButtonRects) {
@@ -1428,10 +1431,10 @@
           y >= btn.y &&
           y <= btn.y + btn.height
         ) {
-          if (twoPlayerMode && selectingPlayer === 1) {
+          if (twoPlayerSelected && selectingPlayer === 1) {
             selectedCharacter1 = btn.name;
             showCharacterSelection(2);
-          } else if (twoPlayerMode && selectingPlayer === 2) {
+          } else if (twoPlayerSelected && selectingPlayer === 2) {
             selectedCharacter2 = btn.name;
             startGame(selectedCharacter1, selectedCharacter2);
           } else {
@@ -1459,6 +1462,7 @@
       if (twoPlayerMode) {
         twoPlayerMode = false;
       }
+      twoPlayerSelected = false;
       resetGame();
     }
   });
