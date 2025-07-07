@@ -17,6 +17,7 @@
     music: { x: 10, y: 50, width: SLIDER_WIDTH, value: 0.01 },
   };
   let draggingSlider = null;
+  let pauseSnapshot = null;
   let selectedCharacter = "Neph";
   let autoplaying = false;
   function audioEnabled() {
@@ -636,8 +637,13 @@
         if (paused) {
           pauseStartTime = Date.now();
           cancelAnimationFrame(animationId);
+          pauseSnapshot = document.createElement("canvas");
+          pauseSnapshot.width = canvas.width;
+          pauseSnapshot.height = canvas.height;
+          pauseSnapshot.getContext("2d").drawImage(canvas, 0, 0);
           drawPauseScreen();
         } else {
+          pauseSnapshot = null;
           totalPausedTime += Date.now() - pauseStartTime;
           animationId = requestAnimationFrame(gameLoop);
         }
@@ -799,10 +805,19 @@
   }
 
   function drawPauseScreen() {
+    if (pauseSnapshot) {
+      ctx.drawImage(pauseSnapshot, 0, 0);
+    }
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "black";
-    drawSpriteText("PAUSED", canvas.width / 2, canvas.height / 2 - DRAW_CHAR_HEIGHT / 2, "center");
+    drawSpriteText(
+      "PAUSED",
+      canvas.width / 2,
+      canvas.height / 2 - DRAW_CHAR_HEIGHT / 2,
+      "center"
+    );
+    drawVolumeSliders();
   }
 
   function updateClouds() {
@@ -1183,11 +1198,13 @@
       if (sliderHit(sliders.sfx)) {
         sliders.sfx.value = ((x - sliders.sfx.x) / sliders.sfx.width) * 0.1;
         sfxVolume = sliders.sfx.value;
+        if (paused) drawPauseScreen();
         return;
       }
       if (sliderHit(sliders.music)) {
         sliders.music.value = ((x - sliders.music.x) / sliders.music.width) * 0.1;
         musicVolume = sliders.music.value;
+        if (paused) drawPauseScreen();
         return;
       }
     }
@@ -1239,10 +1256,12 @@
         draggingSlider = sliders.sfx;
         draggingSlider.value = ((x - draggingSlider.x) / draggingSlider.width) * 0.1;
         sfxVolume = draggingSlider.value;
+        if (paused) drawPauseScreen();
       } else if (sliderHit(sliders.music)) {
         draggingSlider = sliders.music;
         draggingSlider.value = ((x - draggingSlider.x) / draggingSlider.width) * 0.1;
         musicVolume = draggingSlider.value;
+        if (paused) drawPauseScreen();
       }
     }
   });
@@ -1259,10 +1278,12 @@
     } else {
       musicVolume = draggingSlider.value;
     }
+    if (paused) drawPauseScreen();
   });
 
   document.addEventListener("mouseup", () => {
     draggingSlider = null;
+    if (paused) drawPauseScreen();
   });
 
 
