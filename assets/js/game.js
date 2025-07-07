@@ -9,6 +9,7 @@
     MAX_HIGH_SCORES,
   } = Game;
 
+  // DOM references and UI state
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
   let characterSelectionVisible = false;
@@ -33,15 +34,18 @@
   Game.autoplaying = false;
   let demoPreserve = false;
 
+  // Names of all playable characters
   const characters = ["Neph", "Turf", "Seuge", "Jerp", "Smonk", "Nitro", "Zenia", "Beerceps"];
   const spriteCache = {};
 
+  // Physics constants
   const gravity = 0.5;
   // Raised ground level by 30px
   const groundY = 220;
   const CLOUD_SPEED = 0.2;
   let worldSpeed = 0;
 
+  // Base speeds and difficulty scaling
   const BASE_ENEMY_SPEED = -1.5;
   const ENEMY_SPEED_INCREMENT = 8 / 60;
 
@@ -51,6 +55,7 @@
   const PLAYER_SPEED = 4;
   const BASE_SPAWN_INTERVAL = 120;
 
+  // Sprites and bitmap font images
   const sprite = new Image();
   const sprite2 = new Image();
   const alphabetSprite = new Image();
@@ -185,6 +190,7 @@
   let pauseStartTime = 0;
   let enemyKillCount = 0;
   let healthPacks = [];
+  // Small pickup that restores one health when touched
 
   class HealthPack {
     constructor(x, y) {
@@ -211,6 +217,7 @@
       ctx.fill();
     }
   }
+  // Factory for player objects controlling character state and behavior
 
   function createPlayer(getHealth, setHealth, spriteImg) {
     return {
@@ -374,6 +381,7 @@
 
   const player = createPlayer(() => health, v => { health = v; }, sprite);
   let player2 = createPlayer(() => health2, v => { health2 = v; }, sprite2);
+  // Simple enemy entity with basic walking and death states
 
   class Enemy {
     constructor(x, character) {
@@ -1007,6 +1015,7 @@
     }
   }
 
+  // Update scrolling ground blocks and generate new gaps
 
   function updateTerrain() {
     // Move existing blocks
