@@ -3,7 +3,6 @@
 
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
-  const pauseOverlay = document.getElementById("pauseOverlay");
   let characterSelectionVisible = false;
   let awaitingNameEntry = false;
   let enteredName = "";
@@ -637,10 +636,9 @@
         if (paused) {
           pauseStartTime = Date.now();
           cancelAnimationFrame(animationId);
-          pauseOverlay.style.display = "block";
+          drawPauseScreen();
         } else {
           totalPausedTime += Date.now() - pauseStartTime;
-          pauseOverlay.style.display = "none";
           animationId = requestAnimationFrame(gameLoop);
         }
       }
@@ -798,6 +796,13 @@
       const textY = y + (height - DRAW_CHAR_HEIGHT * CHAR_BTN_TEXT_SCALE) / 2;
       drawSpriteText(name, x + width / 2, textY, "center", CHAR_BTN_TEXT_SCALE);
     });
+  }
+
+  function drawPauseScreen() {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "black";
+    drawSpriteText("PAUSED", canvas.width / 2, canvas.height / 2 - DRAW_CHAR_HEIGHT / 2, "center");
   }
 
   function updateClouds() {
