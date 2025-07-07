@@ -150,6 +150,7 @@
   const TREE_CANOPY_SIZE = 60;
   const TREE_MIN_SPACING = 120;
   const TREE_MAX_SPACING = 250;
+  const GROUND_SURFACE_Y = groundY - SPRITE_PADDING + FRAME_HEIGHT;
   const ATTACK_DURATION_FRAMES = 12; // 0.2s at 60fps
   const ATTACK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
   const BLOCK_DURATION_FRAMES = 30; // 0.5s at 60fps
@@ -794,7 +795,7 @@
   function drawTrees() {
     trees.forEach(t => {
       const trunkX = t.x - TREE_TRUNK_WIDTH / 2;
-      const trunkY = groundY - TREE_TRUNK_HEIGHT;
+      const trunkY = GROUND_SURFACE_Y - TREE_TRUNK_HEIGHT;
       ctx.fillStyle = "brown";
       ctx.fillRect(trunkX, trunkY, TREE_TRUNK_WIDTH, TREE_TRUNK_HEIGHT);
       ctx.strokeStyle = "black";
