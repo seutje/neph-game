@@ -18,7 +18,9 @@
   };
   let draggingSlider = null;
   let pauseSnapshot = null;
-  let selectedCharacter = "Neph";
+  let selectedCharacter1 = "Neph";
+  let selectedCharacter2 = "Turf";
+  let selectingPlayer = 1;
   let autoplaying = false;
   function audioEnabled() {
     return !autoplaying;
@@ -44,6 +46,7 @@
   const BASE_SPAWN_INTERVAL = 120;
 
   const sprite = new Image();
+  const sprite2 = new Image();
   const alphabetSprite = new Image();
   const numbersSprite = new Image();
   const CHAR_WIDTH = 43;
@@ -361,8 +364,9 @@
     }
     return null;
   }
-  function createPlayer(getHealth, setHealth) {
+  function createPlayer(getHealth, setHealth, spriteImg) {
     return {
+      sprite: spriteImg,
       x: 50,
       y: groundY,
       width: 64,
@@ -473,7 +477,7 @@
         if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
           const yOffset = frameY === 0 ? 6 : 0;
           ctx.drawImage(
-            sprite,
+            this.sprite,
             SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
             SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
             FRAME_WIDTH,
@@ -514,8 +518,8 @@
     };
   }
 
-  const player = createPlayer(() => health, v => { health = v; });
-  let player2 = createPlayer(() => health2, v => { health2 = v; });
+  const player = createPlayer(() => health, v => { health = v; }, sprite);
+  let player2 = createPlayer(() => health2, v => { health2 = v; }, sprite2);
 
   class Enemy {
     constructor(x, character) {
@@ -819,6 +823,7 @@
 
   let restartButtonRect = null;
   let characterButtonRects = [];
+  let twoPlayerButtonRect = null;
 
   function buildCharacterButtonRects() {
     const startX = (canvas.width - (CHAR_BTN_WIDTH * 2 + CHAR_BTN_SPACING)) / 2;
@@ -834,13 +839,25 @@
         height: CHAR_BTN_HEIGHT,
       };
     });
+    const rows = Math.ceil(characters.length / 2);
+    twoPlayerButtonRect = {
+      x: (canvas.width - CHAR_BTN_WIDTH) / 2,
+      y: startY + rows * (CHAR_BTN_HEIGHT + CHAR_BTN_SPACING) + 10,
+      width: CHAR_BTN_WIDTH,
+      height: CHAR_BTN_HEIGHT,
+    };
   }
 
   function drawCharacterMenu() {
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "black";
-    drawSpriteText("SELECT YOUR CHARACTER", canvas.width / 2, 40, "center");
+    const title = twoPlayerMode
+      ? selectingPlayer === 1
+        ? "PLAYER 1 SELECT"
+        : "PLAYER 2 SELECT"
+      : "SELECT YOUR CHARACTER";
+    drawSpriteText(title, canvas.width / 2, 40, "center");
 
     characterButtonRects.forEach(({ name, x, y, width, height }) => {
       ctx.strokeStyle = "black";
@@ -848,6 +865,24 @@
       const textY = y + (height - DRAW_CHAR_HEIGHT * CHAR_BTN_TEXT_SCALE) / 2;
       drawSpriteText(name, x + width / 2, textY, "center", CHAR_BTN_TEXT_SCALE);
     });
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(
+      twoPlayerButtonRect.x,
+      twoPlayerButtonRect.y,
+      twoPlayerButtonRect.width,
+      twoPlayerButtonRect.height
+    );
+    const modeLabel = "2 PLAYER";
+    const textY =
+      twoPlayerButtonRect.y +
+      (twoPlayerButtonRect.height - DRAW_CHAR_HEIGHT * CHAR_BTN_TEXT_SCALE) / 2;
+    drawSpriteText(
+      modeLabel,
+      twoPlayerButtonRect.x + twoPlayerButtonRect.width / 2,
+      textY,
+      "center",
+      CHAR_BTN_TEXT_SCALE
+    );
   }
 
   function drawPauseScreen() {
@@ -940,7 +975,7 @@
     gameOverScores = loadHighScores();
     awaitingNameEntry = qualifiesForHighScore(score);
     if (awaitingNameEntry) {
-      enteredName = selectedCharacter;
+      enteredName = selectedCharacter1;
     }
     drawGameOverScreen(gameOverScores);
   }
@@ -962,7 +997,7 @@
     awaitingNameEntry = false;
     enteredName = "";
     stopBackgroundMusic();
-    showCharacterSelection();
+    showCharacterSelection(1);
   }
 
   function initGame() {
@@ -1003,8 +1038,9 @@
     gameLoop();
   }
 
-  function showCharacterSelection() {
+  function showCharacterSelection(playerIndex = 1) {
     cancelAnimationFrame(animationId);
+    selectingPlayer = playerIndex;
     characterSelectionVisible = true;
     canvas.style.display = "block";
     showVolume = false;
@@ -1013,12 +1049,17 @@
     startDemo();
   }
 
-  function startGame(character) {
+  function startGame(character, character2 = selectedCharacter2) {
     cancelAnimationFrame(animationId);
-    selectedCharacter = character;
+    selectedCharacter1 = character;
+    selectedCharacter2 = character2;
     const spritePath = `assets/images/sprite-${character.toLowerCase()}.png`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
+    if (twoPlayerMode) {
+      const spritePath2 = `assets/images/sprite-${character2.toLowerCase()}.png`;
+      sprite2.src = spritePath2;
+    }
     characterSelectionVisible = false;
     canvas.style.display = "block";
     showVolume = true;
@@ -1040,7 +1081,7 @@
 
   function startDemo() {
     const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
-    selectedCharacter = randomCharacter;
+    selectedCharacter1 = randomCharacter;
     const spritePath = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
@@ -1345,6 +1386,15 @@
     }
 
     if (characterSelectionVisible) {
+      if (
+        x >= twoPlayerButtonRect.x &&
+        x <= twoPlayerButtonRect.x + twoPlayerButtonRect.width &&
+        y >= twoPlayerButtonRect.y &&
+        y <= twoPlayerButtonRect.y + twoPlayerButtonRect.height
+      ) {
+        twoPlayerMode = !twoPlayerMode;
+        return;
+      }
       for (const btn of characterButtonRects) {
         if (
           x >= btn.x &&
@@ -1352,7 +1402,15 @@
           y >= btn.y &&
           y <= btn.y + btn.height
         ) {
-          startGame(btn.name);
+          if (twoPlayerMode && selectingPlayer === 1) {
+            selectedCharacter1 = btn.name;
+            showCharacterSelection(2);
+          } else if (twoPlayerMode && selectingPlayer === 2) {
+            selectedCharacter2 = btn.name;
+            startGame(selectedCharacter1, selectedCharacter2);
+          } else {
+            startGame(btn.name);
+          }
           break;
         }
       }
@@ -1453,7 +1511,7 @@
       img.onload = () => {
         loaded++;
         if (loaded === total) {
-          showCharacterSelection();
+          showCharacterSelection(1);
         }
       };
       spriteCache[char.toLowerCase()] = img;
@@ -1462,14 +1520,14 @@
     alphabetSprite.onload = () => {
       loaded++;
       if (loaded === total) {
-        showCharacterSelection();
+        showCharacterSelection(1);
       }
     };
     numbersSprite.src = "assets/images/sprite-numbers.png";
     numbersSprite.onload = () => {
       loaded++;
       if (loaded === total) {
-        showCharacterSelection();
+        showCharacterSelection(1);
       }
     };
   }
