@@ -60,6 +60,7 @@
   const sprite2 = new Image();
   const alphabetSprite = new Image();
   const numbersSprite = new Image();
+  const heartSprite = new Image();
   const CHAR_WIDTH = 43;
   const CHAR_HEIGHT = 42;
   const CHAR_SCALE = 0.5;
@@ -197,24 +198,35 @@
       this.x = x;
       this.y = y;
       this.vy = 0;
-      this.radius = 10;
+      this.radius = 20;
       this.createdAt = Date.now();
+      this.picked = false;
+      this.pickupTime = 0;
     }
 
     update() {
-      this.vy += gravity;
-      this.y += this.vy;
-      if (this.y + this.radius > groundY + 75) {
-        this.y = groundY + 75 - this.radius;
-        this.vy = 0;
+      if (this.picked) {
+        this.y += this.vy;
+      } else {
+        this.vy += gravity;
+        this.y += this.vy;
+        if (this.y + this.radius > groundY + 75) {
+          this.y = groundY + 75 - this.radius;
+          this.vy = 0;
+        }
       }
     }
 
     draw() {
-      ctx.fillStyle = "red";
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fill();
+      if (this.picked) {
+        const elapsed = Date.now() - this.pickupTime;
+        ctx.save();
+        ctx.globalAlpha = 1 - elapsed / 500;
+        ctx.drawImage(heartSprite, this.x - 20, this.y - 20, 40, 40);
+        ctx.restore();
+      } else {
+        ctx.drawImage(heartSprite, this.x - 20, this.y - 20, 40, 40);
+      }
     }
   }
   // Factory for player objects controlling character state and behavior
@@ -1227,9 +1239,14 @@
           height: player.height,
         };
         if (rectsOverlap(p1Box, packBox)) {
-          health++;
-          Game.playHealthPackSound();
-          return false;
+          if (!hp.picked) {
+            health++;
+            hp.picked = true;
+            hp.pickupTime = now;
+            hp.vy = -2;
+            Game.playHealthPackSound();
+          }
+          return true;
         }
       }
 
@@ -1241,13 +1258,21 @@
           height: player2.height,
         };
         if (rectsOverlap(p2Box, packBox)) {
-          health2++;
-          Game.playHealthPackSound();
-          return false;
+          if (!hp.picked) {
+            health2++;
+            hp.picked = true;
+            hp.pickupTime = now;
+            hp.vy = -2;
+            Game.playHealthPackSound();
+          }
+          return true;
         }
       }
 
-      return now - hp.createdAt < 500;
+      if (hp.picked) {
+        return now - hp.pickupTime < 500;
+      }
+      return now - hp.createdAt < 1000;
     });
 
     drawScore();
@@ -1438,7 +1463,7 @@
 
   function preload() {
     let loaded = 0;
-    const total = characters.length + 2;
+    const total = characters.length + 3;
     for (const char of characters) {
       const img = new Image();
       img.src = `assets/images/sprite-${char.toLowerCase()}.png`;
@@ -1459,6 +1484,13 @@
     };
     numbersSprite.src = "assets/images/sprite-numbers.png";
     numbersSprite.onload = () => {
+      loaded++;
+      if (loaded === total) {
+        showCharacterSelection(1);
+      }
+    };
+    heartSprite.src = "assets/images/sprite-heart.png";
+    heartSprite.onload = () => {
       loaded++;
       if (loaded === total) {
         showCharacterSelection(1);
