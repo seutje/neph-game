@@ -818,6 +818,18 @@
       "center"
     );
     drawVolumeSliders();
+    const btnX = (canvas.width - CHAR_BTN_WIDTH) / 2;
+    const btnY = canvas.height - CHAR_BTN_HEIGHT - 10;
+    const textY = btnY + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT) / 2;
+    drawSpriteText("RESTART", btnX + CHAR_BTN_WIDTH / 2, textY, "center");
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(btnX, btnY, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
+    restartButtonRect = {
+      x: btnX,
+      y: btnY,
+      width: CHAR_BTN_WIDTH,
+      height: CHAR_BTN_HEIGHT,
+    };
   }
 
   function updateClouds() {
@@ -1225,13 +1237,18 @@
     }
 
     if (
-      gameOver &&
+      (gameOver || paused) &&
       restartButtonRect &&
       x >= restartButtonRect.x &&
       x <= restartButtonRect.x + restartButtonRect.width &&
       y >= restartButtonRect.y &&
       y <= restartButtonRect.y + restartButtonRect.height
     ) {
+      if (paused) {
+        paused = false;
+        pauseSnapshot = null;
+        totalPausedTime += Date.now() - pauseStartTime;
+      }
       resetGame();
     }
   });
