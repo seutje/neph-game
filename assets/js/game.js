@@ -22,6 +22,7 @@
   let selectedCharacter2 = "Turf";
   let selectingPlayer = 1;
   let autoplaying = false;
+  let demoPreserve = false;
   function audioEnabled() {
     return !autoplaying;
   }
@@ -1059,7 +1060,7 @@
     showVolume = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     buildCharacterButtonRects();
-    startDemo();
+    startDemo(playerIndex !== 1);
   }
 
   function startGame(character, character2 = selectedCharacter2) {
@@ -1092,9 +1093,12 @@
     }
   }
 
-  function startDemo() {
+  function startDemo(preserve = false) {
+    demoPreserve = preserve;
     const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
-    selectedCharacter1 = randomCharacter;
+    if (!demoPreserve) {
+      selectedCharacter1 = randomCharacter;
+    }
     const spritePath = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
@@ -1349,7 +1353,7 @@
       animationId = requestAnimationFrame(gameLoop);
     } else {
       if (autoplaying) {
-        startDemo();
+        startDemo(demoPreserve);
         initGame();
       } else {
         showGameOver();
