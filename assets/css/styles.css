@@ -10,6 +10,18 @@ body {
   margin: 0;
 }
 
+#instructions {
+  text-align: center;
+}
+
+#instructions ul {
+  padding-left: 0;
+}
+
+#instructions li {
+  list-style: none;
+}
+
 #gameCanvas {
   display: none;
 }
