@@ -148,7 +148,7 @@
   const TREE_TRUNK_WIDTH = 30;
   const TREE_TRUNK_HEIGHT = 60;
   const TREE_CANOPY_SIZE = 60;
-  const TREE_MIN_SPACING = 120;
+  const TREE_MIN_SPACING = 180;
   const TREE_MAX_SPACING = 250;
   const GROUND_SURFACE_Y = groundY - SPRITE_PADDING + FRAME_HEIGHT;
   const ATTACK_DURATION_FRAMES = 12; // 0.2s at 60fps
@@ -775,8 +775,13 @@
     trees.length = 0;
     let x = 100;
     while (x < canvas.width * 2) {
-      trees.push({ x });
-      x += TREE_MIN_SPACING + Math.random() * (TREE_MAX_SPACING - TREE_MIN_SPACING);
+      const gap = gaps.find(g => x >= g.x && x <= g.x + g.width);
+      if (!gap) {
+        trees.push({ x });
+        x += TREE_MIN_SPACING + Math.random() * (TREE_MAX_SPACING - TREE_MIN_SPACING);
+      } else {
+        x = gap.x + gap.width + TREE_MIN_SPACING;
+      }
     }
   }
 
@@ -788,6 +793,10 @@
     let lastX = trees.length ? trees[trees.length - 1].x : 0;
     while (lastX < canvas.width * 2) {
       lastX += TREE_MIN_SPACING + Math.random() * (TREE_MAX_SPACING - TREE_MIN_SPACING);
+      const gap = gaps.find(g => lastX >= g.x && lastX <= g.x + g.width);
+      if (gap) {
+        lastX = gap.x + gap.width + TREE_MIN_SPACING;
+      }
       trees.push({ x: lastX });
     }
   }
