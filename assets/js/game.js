@@ -412,7 +412,7 @@
     }
     update() {
       if (this.state === "walk") {
-        if (!this.jumping && Math.random() < 0.01) {
+        if (!this.jumping && this.y >= groundY && Math.random() < 0.01) {
           this.vy = -10;
           this.jumping = true;
         }
@@ -438,6 +438,10 @@
             this.jumping = false;
           } else {
             this.fellInGap = this.fellInGap || overGap;
+            if (overGap) {
+              // enemy is falling into a gap
+              this.jumping = true;
+            }
           }
         }
         if (this.y > canvas.height) {
