@@ -38,6 +38,7 @@
 
   const BASE_WORLD_SPEED = -0.2;
   const WORLD_SPEED_INCREMENT = ENEMY_SPEED_INCREMENT;
+  const SCROLL_START_DELAY = 10; // seconds before world begins scrolling
   const PLAYER_SPEED = 4;
   const BASE_SPAWN_INTERVAL = 120;
 
@@ -1002,7 +1003,12 @@
     drawClouds();
 
     const elapsedSeconds = (Date.now() - gameStartTime - totalPausedTime) / 1000;
-    worldSpeed = BASE_WORLD_SPEED * (1 + WORLD_SPEED_INCREMENT * elapsedSeconds);
+    const scrollElapsed = elapsedSeconds - SCROLL_START_DELAY;
+    if (scrollElapsed > 0) {
+      worldSpeed = BASE_WORLD_SPEED * (1 + WORLD_SPEED_INCREMENT * scrollElapsed);
+    } else {
+      worldSpeed = 0;
+    }
     if (player.x > canvas.width * 0.5 && player.vx > 0) {
       worldSpeed -= player.vx;
     }
