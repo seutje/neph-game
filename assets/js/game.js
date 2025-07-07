@@ -1456,6 +1456,9 @@
         pauseSnapshot = null;
         totalPausedTime += Date.now() - pauseStartTime;
       }
+      if (twoPlayerMode) {
+        twoPlayerMode = false;
+      }
       resetGame();
     }
   });
