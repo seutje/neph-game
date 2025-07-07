@@ -5,7 +5,8 @@
   Game.sfxVolume = Game.sfxVolume || 0.01;
   let audioCtx;
   let musicInterval;
-  const musicNotes = [
+  let currentTrack = 0;
+  const musicTrack1 = [
     130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
     130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
     164.82, 196.0, 220.0, 196.0, 174.62, 164.82, 146.83, 130.81,
@@ -15,6 +16,10 @@
     130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
     164.82, 196.0, 220.0, 196.0, 174.62, 164.82, 146.83, 130.81
   ];
+
+  const musicTrack2 = [...musicTrack1].reverse();
+
+  const tracks = [musicTrack1, musicTrack2];
 
   function audioEnabled() {
     return !Game.autoplaying;
@@ -87,7 +92,8 @@
     let beat = 0;
     clearInterval(musicInterval);
     musicInterval = setInterval(() => {
-      playNote(musicNotes[idx % musicNotes.length], 0.3, Game.musicVolume);
+      const notes = tracks[currentTrack];
+      playNote(notes[idx], 0.3, Game.musicVolume);
       if (beat % 4 === 0) {
         playKick(Game.musicVolume);
       } else if (beat % 4 === 2) {
@@ -95,6 +101,10 @@
       }
       idx++;
       beat++;
+      if (idx >= notes.length) {
+        idx = 0;
+        currentTrack = (currentTrack + 1) % tracks.length;
+      }
     }, 300);
   }
 
