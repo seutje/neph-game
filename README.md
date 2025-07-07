@@ -15,7 +15,7 @@ This repository contains a small browser-based platform game.
    - **Up Arrow** – Jump over gaps or onto enemies.
    - **Space** – Attack with your weapon.
    - **Down Arrow** – Hold to block incoming hits.
-   - **P** – Pause or resume the action.
+  - **P** – Pause or resume the action. When paused you can click the on-screen restart button to start over.
 5. Defeat enemies and collect health packs to increase your score and survive as long as possible. When you fall or your health reaches zero the game ends. Save your name to the high score table if you qualify.
 
 ## Features
@@ -27,7 +27,7 @@ This repository contains a small browser-based platform game.
 - **Enemy AI** – Enemies walk, jump, fall into pits and die when hit or stomped.
 - **Health system** – Start with three hearts. Every third defeated enemy drops a health pack.
 - **Score & high scores** – Earn points for killing enemies. The top five scores are stored locally in your browser.
-- **Pause functionality** – Press <kbd>P</kbd> at any time to pause the game.
+- **Pause functionality** – Press <kbd>P</kbd> at any time to pause the game. The pause screen includes a restart button.
 - **Chiptune music and sound effects** – Background music and SFX with adjustable volume sliders.
 - **Keyboard-only controls** – All interaction is via the keyboard, making the game easy to pick up.
 
