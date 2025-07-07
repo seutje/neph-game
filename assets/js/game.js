@@ -143,6 +143,12 @@
     { x: 300, y: 80 },
     { x: 500, y: 50 }
   ];
+  let trees = [];
+  const TREE_TRUNK_WIDTH = 10;
+  const TREE_TRUNK_HEIGHT = 20;
+  const TREE_CANOPY_SIZE = 20;
+  const TREE_MIN_SPACING = 120;
+  const TREE_MAX_SPACING = 250;
   const ATTACK_DURATION_FRAMES = 12; // 0.2s at 60fps
   const ATTACK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
   const BLOCK_DURATION_FRAMES = 30; // 0.5s at 60fps
@@ -763,6 +769,44 @@
     });
   }
 
+  function initTrees() {
+    trees.length = 0;
+    let x = 100;
+    while (x < canvas.width * 2) {
+      trees.push({ x });
+      x += TREE_MIN_SPACING + Math.random() * (TREE_MAX_SPACING - TREE_MIN_SPACING);
+    }
+  }
+
+  function updateTrees() {
+    trees.forEach(t => {
+      t.x += worldSpeed;
+    });
+    trees = trees.filter(t => t.x + TREE_CANOPY_SIZE > 0);
+    let lastX = trees.length ? trees[trees.length - 1].x : 0;
+    while (lastX < canvas.width * 2) {
+      lastX += TREE_MIN_SPACING + Math.random() * (TREE_MAX_SPACING - TREE_MIN_SPACING);
+      trees.push({ x: lastX });
+    }
+  }
+
+  function drawTrees() {
+    trees.forEach(t => {
+      const trunkX = t.x - TREE_TRUNK_WIDTH / 2;
+      const trunkY = groundY - TREE_TRUNK_HEIGHT;
+      ctx.fillStyle = "brown";
+      ctx.fillRect(trunkX, trunkY, TREE_TRUNK_WIDTH, TREE_TRUNK_HEIGHT);
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(trunkX, trunkY, TREE_TRUNK_WIDTH, TREE_TRUNK_HEIGHT);
+      const canopyX = t.x - TREE_CANOPY_SIZE / 2;
+      const canopyY = trunkY - TREE_CANOPY_SIZE;
+      ctx.fillStyle = "green";
+      ctx.fillRect(canopyX, canopyY, TREE_CANOPY_SIZE, TREE_CANOPY_SIZE);
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(canopyX, canopyY, TREE_CANOPY_SIZE, TREE_CANOPY_SIZE);
+    });
+  }
+
   function generateGaps() {
     while (terrainCursor < canvas.width * 3) {
       if (Math.random() < GAP_CHANCE) {
@@ -862,6 +906,7 @@
       player2.touchingLeft = false;
     }
     initTerrain();
+    initTrees();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     lastFrameTime = performance.now();
     gameLoop();
@@ -1036,7 +1081,9 @@
     });
 
     updateTerrain();
+    updateTrees();
     drawGround();
+    drawTrees();
 
     enemies.forEach(e => {
       const enemyBox = {
