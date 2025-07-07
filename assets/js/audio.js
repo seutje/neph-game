@@ -1,3 +1,4 @@
+// Audio utility functions for game sound effects and music
 (() => {
   const Game = window.Game || (window.Game = {});
 
@@ -20,11 +21,13 @@
   const musicTrack2 = [...musicTrack1].reverse();
 
   const tracks = [musicTrack1, musicTrack2];
+  // True when sound should play (disabled during autoplay demo)
 
   function audioEnabled() {
     return !Game.autoplaying;
   }
 
+  // Play a single oscillator note
   function playNote(freq, duration = 0.3, volume = Game.musicVolume) {
     if (!audioEnabled() || !audioCtx) return;
     const osc = audioCtx.createOscillator();
@@ -40,6 +43,7 @@
     osc.stop(audioCtx.currentTime + duration);
   }
 
+  // Kick drum sound synthesized with downward pitch sweep
   function playKick(volume = Game.musicVolume) {
     if (!audioEnabled() || !audioCtx) return;
     const osc = audioCtx.createOscillator();
@@ -56,6 +60,7 @@
     osc.stop(audioCtx.currentTime + 0.11);
   }
 
+  // White noise burst used for a snare drum effect
   function playSnare(volume = Game.musicVolume) {
     if (!audioEnabled() || !audioCtx) return;
     const bufferSize = audioCtx.sampleRate * 0.2;
@@ -80,6 +85,7 @@
     noise.stop(audioCtx.currentTime + 0.2);
   }
 
+  // Begin looping chiptune music using oscillator notes
   function startBackgroundMusic() {
     if (!audioEnabled()) return;
     if (!audioCtx) {
@@ -108,33 +114,39 @@
     }, 300);
   }
 
+  // Sound played when the player jumps
   function playJumpSound() {
     if (!audioEnabled()) return;
     playNote(329.63, 0.1, Game.sfxVolume);
   }
 
+  // Short blip used when the player attacks
   function playAttackSound() {
     if (!audioEnabled()) return;
     playNote(261.63, 0.1, Game.sfxVolume);
   }
 
+  // Played when the player takes damage
   function playDamageSound() {
     if (!audioEnabled()) return;
     playNote(196.0, 0.1, Game.sfxVolume);
   }
 
+  // Two-note chirp when a health pack is collected
   function playHealthPackSound() {
     if (!audioEnabled()) return;
     playNote(392.0, 0.07, Game.sfxVolume);
     setTimeout(() => playNote(523.25, 0.07, Game.sfxVolume), 70);
   }
 
+  // Sound effect for enemy defeat
   function playEnemyKillSound() {
     if (!audioEnabled()) return;
     playNote(329.63, 0.1, Game.sfxVolume);
     setTimeout(() => playNote(261.63, 0.1, Game.sfxVolume), 100);
   }
 
+  // Sequence of descending notes when the player dies
   function playDeathSound() {
     if (!audioEnabled()) return;
     playNote(261.63, 0.15, Game.sfxVolume);
@@ -143,6 +155,7 @@
     setTimeout(() => playNote(98.0, 0.15, Game.sfxVolume), 450);
   }
 
+  // Stop the music loop if it is running
   function stopBackgroundMusic() {
     if (musicInterval) {
       clearInterval(musicInterval);
@@ -150,6 +163,7 @@
     }
   }
 
+  // Expose API on the global Game object
   Game.startBackgroundMusic = startBackgroundMusic;
   Game.stopBackgroundMusic = stopBackgroundMusic;
   Game.playJumpSound = playJumpSound;
