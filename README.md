@@ -9,7 +9,7 @@ This repository contains a small browser-based platform game.
    npm install
    ```
 2. Open `game.html` in a modern web browser.
-3. Choose one of the available characters. Click the **2 PLAYER** button if you want to play cooperatively and let the second player pick a character after the first. Once player one has chosen, the demo pauses until player two selects their character.
+3. Choose one of the available characters. Click the **2 PLAYER** button if you want to play cooperatively and let the second player pick a character after the first. The demo continues running while player two selects their character.
 4. Use the following controls:
    - **Left/Right Arrows** – Move your character.
    - **Up Arrow** – Jump over gaps or onto enemies.

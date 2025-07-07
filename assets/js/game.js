@@ -1053,17 +1053,19 @@
   }
 
   function showCharacterSelection(playerIndex = 1) {
-    cancelAnimationFrame(animationId);
     selectingPlayer = playerIndex;
     characterSelectionVisible = true;
     canvas.style.display = "block";
     showVolume = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     buildCharacterButtonRects();
-    autoplaying = false;
-    if (!(twoPlayerMode && playerIndex === 2)) {
-      startDemo(playerIndex !== 1);
+    if (twoPlayerMode && playerIndex === 2) {
+      demoPreserve = true;
+      return; // keep demo running in the background
     }
+    cancelAnimationFrame(animationId);
+    autoplaying = false;
+    startDemo(playerIndex !== 1);
   }
 
   function startGame(character, character2 = selectedCharacter2) {
