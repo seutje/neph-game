@@ -9,12 +9,13 @@ This repository contains a small browser-based platform game.
    npm install
    ```
 2. Open `game.html` in a modern web browser.
-3. Choose one of the available characters.
+3. Choose one of the available characters. Click the **2 PLAYER** button if you want to play cooperatively and let the second player pick a character after the first. The demo continues running while player two selects their character.
 4. Use the following controls:
    - **Left/Right Arrows** – Move your character.
    - **Up Arrow** – Jump over gaps or onto enemies.
    - **Space** – Attack with your weapon.
    - **Down Arrow** – Hold to block incoming hits.
+   - **WASD/ZQSD + Ctrl** – Second player controls when two-player mode is enabled. In single player these are alternate keys for player one.
   - **P** – Pause or resume the action. When paused you can click the on-screen restart button to start over.
 5. Defeat enemies and collect health packs to increase your score and survive as long as possible. When you fall or your health reaches zero the game ends. Save your name to the high score table if you qualify.
 

@@ -18,8 +18,12 @@
   };
   let draggingSlider = null;
   let pauseSnapshot = null;
-  let selectedCharacter = "Neph";
+  let selectedCharacter1 = "Neph";
+  let selectedCharacter2 = "Turf";
+  let selectingPlayer = 1;
+  let twoPlayerSelected = false;
   let autoplaying = false;
+  let demoPreserve = false;
   function audioEnabled() {
     return !autoplaying;
   }
@@ -44,6 +48,7 @@
   const BASE_SPAWN_INTERVAL = 120;
 
   const sprite = new Image();
+  const sprite2 = new Image();
   const alphabetSprite = new Image();
   const numbersSprite = new Image();
   const CHAR_WIDTH = 43;
@@ -140,10 +145,22 @@
   const BLOCK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
   let score = 0;
   let health = 3;
+  let health2 = 3;
+  let twoPlayerMode = false;
   let gameOver = false;
   let animationId;
   let paused = false;
   let autoPaused = false;
+
+  function maybeEndGame() {
+    if (twoPlayerMode) {
+      if (health < 1 && health2 < 1) {
+        gameOver = true;
+      }
+    } else if (health < 1) {
+      gameOver = true;
+    }
+  }
 
   // Web Audio API setup for simple chiptune background music
   let audioCtx;
@@ -359,155 +376,165 @@
     }
     return null;
   }
-  const player = {
-    x: 50,
-    y: groundY,
-    width: 64,
-    height: 85,
-    vx: 0,
-    vy: 0,
-    frame: 0,
-    direction: 1,
-    jumping: false,
-    attacking: false,
-    blocking: false,
-    attackTimer: 0,
-    cooldown: 0,
-    blockTimer: 0,
-    blockCooldown: 0,
-    invincible: false,
-    invincibility: 0,
-    touchingLeft: false,
-    attack() {
-      if (!this.attacking && this.cooldown <= 0) {
-        this.attacking = true;
-        this.attackTimer = ATTACK_DURATION_FRAMES;
-        playAttackSound();
-      }
-    },
-    block() {
-      if (!this.blocking && this.blockCooldown <= 0) {
-        this.blocking = true;
-        this.blockTimer = BLOCK_DURATION_FRAMES;
-      }
-    },
-    update() {
-      if (this.invincible) {
-        this.invincibility--;
-        if (this.invincibility <= 0) {
-          this.invincible = false;
+  function createPlayer(getHealth, setHealth, spriteImg) {
+    return {
+      sprite: spriteImg,
+      x: 50,
+      y: groundY,
+      width: 64,
+      height: 85,
+      vx: 0,
+      vy: 0,
+      frame: 0,
+      direction: 1,
+      jumping: false,
+      attacking: false,
+      blocking: false,
+      attackTimer: 0,
+      cooldown: 0,
+      blockTimer: 0,
+      blockCooldown: 0,
+      invincible: false,
+      invincibility: 0,
+      touchingLeft: false,
+      attack() {
+        if (!this.attacking && this.cooldown <= 0) {
+          this.attacking = true;
+          this.attackTimer = ATTACK_DURATION_FRAMES;
+          playAttackSound();
         }
-      }
-      if (this.attacking) {
-        this.attackTimer--;
-        if (this.attackTimer <= 0) {
-          this.attacking = false;
-          this.cooldown = ATTACK_COOLDOWN_FRAMES;
+      },
+      block() {
+        if (!this.blocking && this.blockCooldown <= 0) {
+          this.blocking = true;
+          this.blockTimer = BLOCK_DURATION_FRAMES;
         }
-      } else if (this.cooldown > 0) {
-        this.cooldown--;
-      }
+      },
+      update() {
+        if (getHealth() < 1) return;
+        if (this.invincible) {
+          this.invincibility--;
+          if (this.invincibility <= 0) {
+            this.invincible = false;
+          }
+        }
+        if (this.attacking) {
+          this.attackTimer--;
+          if (this.attackTimer <= 0) {
+            this.attacking = false;
+            this.cooldown = ATTACK_COOLDOWN_FRAMES;
+          }
+        } else if (this.cooldown > 0) {
+          this.cooldown--;
+        }
 
-      if (this.blocking) {
-        this.blockTimer--;
-        if (this.blockTimer <= 0) {
-          this.blocking = false;
-          this.blockCooldown = BLOCK_COOLDOWN_FRAMES;
+        if (this.blocking) {
+          this.blockTimer--;
+          if (this.blockTimer <= 0) {
+            this.blocking = false;
+            this.blockCooldown = BLOCK_COOLDOWN_FRAMES;
+          }
+        } else if (this.blockCooldown > 0) {
+          this.blockCooldown--;
         }
-      } else if (this.blockCooldown > 0) {
-        this.blockCooldown--;
-      }
-      this.vy += gravity;
-      this.y += this.vy;
-      if (this.y < 0) {
-        this.y = 0;
-        this.vy = 0;
-      }
-      if (this.y >= groundY) {
-        const centerX = this.x + this.width / 2;
-        const overGap = gaps.some(g => centerX >= g.x && centerX <= g.x + g.width);
-        if (!overGap) {
-          this.y = groundY;
+        this.vy += gravity;
+        this.y += this.vy;
+        if (this.y < 0) {
+          this.y = 0;
           this.vy = 0;
-          this.jumping = false;
         }
-      }
-      if (this.y > canvas.height) {
-        gameOver = true;
-      }
-      this.x += this.vx + worldSpeed;
-      if (this.x < 0) {
-        this.x = 0;
-        if (!this.touchingLeft) {
-          this.touchingLeft = true;
-          this.hit();
+        if (this.y >= groundY) {
+          const centerX = this.x + this.width / 2;
+          const overGap = gaps.some(g => centerX >= g.x && centerX <= g.x + g.width);
+          if (!overGap) {
+            this.y = groundY;
+            this.vy = 0;
+            this.jumping = false;
+          }
         }
-      } else {
-        this.touchingLeft = false;
-        if (this.x + this.width > canvas.width) {
-          this.x = canvas.width - this.width;
+        if (this.y > canvas.height) {
+          setHealth(0);
+          maybeEndGame();
         }
-      }
-    },
-    draw() {
-      let frameY = 0;
-      if (this.attacking) {
-        frameY = 0;
-        this.frame = 3;
-      } else if (this.jumping) {
-        frameY = 0;
-        this.frame = 2;
-      } else if (this.blocking) {
-        frameY = 1;
-        this.frame = 3;
-      } else if (this.vx !== 0) {
-        frameY = 0;
-        this.frame = (this.frame + 0.1) % 3;
-      } else {
-        frameY = 1;
-        this.frame = 0;
-      }
-      if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
-        const yOffset = frameY === 0 ? 6 : 0;
-        ctx.drawImage(
-          sprite,
-          SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
-          SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
-          FRAME_WIDTH,
-          FRAME_HEIGHT,
-          this.x - SPRITE_PADDING,
-          this.y - SPRITE_PADDING + yOffset,
-          FRAME_WIDTH,
-          FRAME_HEIGHT
-        );
-      }
-      if (DEBUG) {
-        ctx.strokeStyle = "lime";
-        ctx.strokeRect(
-          this.x - SPRITE_PADDING,
-          this.y - SPRITE_PADDING,
-          FRAME_WIDTH,
-          FRAME_HEIGHT
-        );
-      }
-    },
-    hit() {
-      if (!this.invincible && !this.blocking) {
-        health = Math.max(0, health - 1);
-        const willDie = health < 1;
-        if (!willDie) {
-          this.invincible = true;
-          this.invincibility = 60;
+        this.x += this.vx + worldSpeed;
+        if (this.x < 0) {
+          this.x = 0;
+          if (!this.touchingLeft) {
+            this.touchingLeft = true;
+            this.hit();
+          }
+        } else {
+          this.touchingLeft = false;
+          if (this.x + this.width > canvas.width) {
+            this.x = canvas.width - this.width;
+          }
         }
-        this.vy = -8;
-        this.jumping = true;
-        playDamageSound();
-        if (willDie) {
-          gameOver = true;
+      },
+      draw() {
+        if (getHealth() < 1) return;
+        let frameY = 0;
+        if (this.attacking) {
+          frameY = 0;
+          this.frame = 3;
+        } else if (this.jumping) {
+          frameY = 0;
+          this.frame = 2;
+        } else if (this.blocking) {
+          frameY = 1;
+          this.frame = 3;
+        } else if (this.vx !== 0) {
+          frameY = 0;
+          this.frame = (this.frame + 0.1) % 3;
+        } else {
+          frameY = 1;
+          this.frame = 0;
         }
-      }
-    },
-  };
+        if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
+          const yOffset = frameY === 0 ? 6 : 0;
+          ctx.drawImage(
+            this.sprite,
+            SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
+            SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
+            FRAME_WIDTH,
+            FRAME_HEIGHT,
+            this.x - SPRITE_PADDING,
+            this.y - SPRITE_PADDING + yOffset,
+            FRAME_WIDTH,
+            FRAME_HEIGHT
+          );
+        }
+        if (DEBUG) {
+          ctx.strokeStyle = "lime";
+          ctx.strokeRect(
+            this.x - SPRITE_PADDING,
+            this.y - SPRITE_PADDING,
+            FRAME_WIDTH,
+            FRAME_HEIGHT
+          );
+        }
+      },
+      hit() {
+        if (!this.invincible && !this.blocking) {
+          const newHealth = Math.max(0, getHealth() - 1);
+          setHealth(newHealth);
+          const willDie = newHealth < 1;
+          if (!willDie) {
+            this.invincible = true;
+            this.invincibility = 60;
+          }
+          this.vy = -8;
+          this.jumping = true;
+          playDamageSound();
+          if (willDie) {
+            maybeEndGame();
+          }
+        }
+      },
+    };
+  }
+
+  const player = createPlayer(() => health, v => { health = v; }, sprite);
+  let player2 = createPlayer(() => health2, v => { health2 = v; }, sprite2);
 
   class Enemy {
     constructor(x, character) {
@@ -662,18 +689,34 @@
         }
       }
     } else {
-      if (e.key === " " && !keys[e.key]) {
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (key === " " && !keys[key]) {
         player.attack();
       }
-      if (e.key === "ArrowDown" && !keys[e.key]) {
+      if (key === "Control" && !keys[key]) {
+        if (twoPlayerMode) {
+          player2.attack();
+        } else {
+          player.attack();
+        }
+      }
+      if (key === "ArrowDown" && !keys[key]) {
         player.block();
       }
-      keys[e.key] = true;
+      if (key === "s" && !keys[key]) {
+        if (twoPlayerMode) {
+          player2.block();
+        } else {
+          player.block();
+        }
+      }
+      keys[key] = true;
     }
   });
   document.addEventListener("keyup", e => {
     if (awaitingNameEntry) return;
-    keys[e.key] = false;
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    keys[key] = false;
   });
 
   let enemies = [];
@@ -713,7 +756,16 @@
 
   function drawHealth() {
     ctx.fillStyle = "black";
-    drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
+    if (twoPlayerMode) {
+      drawSpriteText(
+        `P1 ${health} P2 ${health2}`,
+        canvas.width - 10,
+        10,
+        "right"
+      );
+    } else {
+      drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
+    }
   }
 
   function drawSlider(slider, label) {
@@ -786,6 +838,7 @@
 
   let restartButtonRect = null;
   let characterButtonRects = [];
+  let twoPlayerButtonRect = null;
 
   function buildCharacterButtonRects() {
     const startX = (canvas.width - (CHAR_BTN_WIDTH * 2 + CHAR_BTN_SPACING)) / 2;
@@ -801,13 +854,25 @@
         height: CHAR_BTN_HEIGHT,
       };
     });
+    const rows = Math.ceil(characters.length / 2);
+    twoPlayerButtonRect = {
+      x: (canvas.width - CHAR_BTN_WIDTH) / 2,
+      y: startY + rows * (CHAR_BTN_HEIGHT + CHAR_BTN_SPACING) + 10,
+      width: CHAR_BTN_WIDTH,
+      height: CHAR_BTN_HEIGHT,
+    };
   }
 
   function drawCharacterMenu() {
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "black";
-    drawSpriteText("SELECT YOUR CHARACTER", canvas.width / 2, 40, "center");
+    const title = twoPlayerSelected
+      ? selectingPlayer === 1
+        ? "PLAYER 1 SELECT"
+        : "PLAYER 2 SELECT"
+      : "SELECT YOUR CHARACTER";
+    drawSpriteText(title, canvas.width / 2, 40, "center");
 
     characterButtonRects.forEach(({ name, x, y, width, height }) => {
       ctx.strokeStyle = "black";
@@ -815,6 +880,24 @@
       const textY = y + (height - DRAW_CHAR_HEIGHT * CHAR_BTN_TEXT_SCALE) / 2;
       drawSpriteText(name, x + width / 2, textY, "center", CHAR_BTN_TEXT_SCALE);
     });
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(
+      twoPlayerButtonRect.x,
+      twoPlayerButtonRect.y,
+      twoPlayerButtonRect.width,
+      twoPlayerButtonRect.height
+    );
+    const modeLabel = "2 PLAYER";
+    const textY =
+      twoPlayerButtonRect.y +
+      (twoPlayerButtonRect.height - DRAW_CHAR_HEIGHT * CHAR_BTN_TEXT_SCALE) / 2;
+    drawSpriteText(
+      modeLabel,
+      twoPlayerButtonRect.x + twoPlayerButtonRect.width / 2,
+      textY,
+      "center",
+      CHAR_BTN_TEXT_SCALE
+    );
   }
 
   function drawPauseScreen() {
@@ -907,7 +990,7 @@
     gameOverScores = loadHighScores();
     awaitingNameEntry = qualifiesForHighScore(score);
     if (awaitingNameEntry) {
-      enteredName = selectedCharacter;
+      enteredName = selectedCharacter1;
     }
     drawGameOverScreen(gameOverScores);
   }
@@ -929,12 +1012,13 @@
     awaitingNameEntry = false;
     enteredName = "";
     stopBackgroundMusic();
-    showCharacterSelection();
+    showCharacterSelection(1);
   }
 
   function initGame() {
     score = 0;
     health = 3;
+    health2 = 3;
     gameOver = false;
     enemies = [];
     spawnTimer = 0;
@@ -952,28 +1036,51 @@
     player.attackTimer = 0;
     player.cooldown = 0;
     player.touchingLeft = false;
+    if (twoPlayerMode) {
+      player2.x = 100;
+      player2.y = groundY;
+      player2.vx = 0;
+      player2.vy = 0;
+      player2.jumping = false;
+      player2.attacking = false;
+      player2.attackTimer = 0;
+      player2.cooldown = 0;
+      player2.touchingLeft = false;
+    }
     initTerrain();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     lastFrameTime = performance.now();
     gameLoop();
   }
 
-  function showCharacterSelection() {
-    cancelAnimationFrame(animationId);
+  function showCharacterSelection(playerIndex = 1) {
+    selectingPlayer = playerIndex;
     characterSelectionVisible = true;
     canvas.style.display = "block";
     showVolume = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     buildCharacterButtonRects();
-    startDemo();
+    if (twoPlayerSelected && playerIndex === 2) {
+      demoPreserve = true;
+      return; // keep demo running in the background
+    }
+    cancelAnimationFrame(animationId);
+    autoplaying = false;
+    startDemo(playerIndex !== 1);
   }
 
-  function startGame(character) {
+  function startGame(character, character2 = selectedCharacter2) {
     cancelAnimationFrame(animationId);
-    selectedCharacter = character;
+    selectedCharacter1 = character;
+    selectedCharacter2 = character2;
+    twoPlayerMode = twoPlayerSelected;
     const spritePath = `assets/images/sprite-${character.toLowerCase()}.png`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
+    if (twoPlayerMode) {
+      const spritePath2 = `assets/images/sprite-${character2.toLowerCase()}.png`;
+      sprite2.src = spritePath2;
+    }
     characterSelectionVisible = false;
     canvas.style.display = "block";
     showVolume = true;
@@ -993,9 +1100,13 @@
     }
   }
 
-  function startDemo() {
+  function startDemo(preserve = false) {
+    demoPreserve = preserve;
+    twoPlayerMode = false;
     const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
-    selectedCharacter = randomCharacter;
+    if (!demoPreserve) {
+      selectedCharacter1 = randomCharacter;
+    }
     const spritePath = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
@@ -1068,18 +1179,39 @@
         player.vx = -PLAYER_SPEED;
       } else if (keys["ArrowRight"]) {
         player.vx = PLAYER_SPEED;
+      } else if (!twoPlayerMode && (keys["a"] || keys["q"])) {
+        player.vx = -PLAYER_SPEED;
+      } else if (!twoPlayerMode && keys["d"]) {
+        player.vx = PLAYER_SPEED;
       } else {
         player.vx = 0;
       }
 
-      if (keys["ArrowUp"] && !player.jumping) {
+      if ((keys["ArrowUp"] || (!twoPlayerMode && (keys["w"] || keys["z"]))) && !player.jumping) {
         player.vy = -10;
         player.jumping = true;
         playJumpSound();
       }
+
+      if (twoPlayerMode) {
+        if (keys["a"] || keys["q"]) {
+          player2.vx = -PLAYER_SPEED;
+        } else if (keys["d"]) {
+          player2.vx = PLAYER_SPEED;
+        } else {
+          player2.vx = 0;
+        }
+
+        if ((keys["w"] || keys["z"]) && !player2.jumping) {
+          player2.vy = -10;
+          player2.jumping = true;
+          playJumpSound();
+        }
+      }
     }
 
     player.update();
+    if (twoPlayerMode) player2.update();
     enemies.forEach(e => {
       e.x += worldSpeed;
       e.update();
@@ -1093,36 +1225,67 @@
     drawGround();
 
     enemies.forEach(e => {
-      const playerBox = {
-        x: player.x,
-        y: player.y,
-        width: FRAME_WIDTH - SPRITE_PADDING * 3,
-        height: FRAME_HEIGHT - SPRITE_PADDING * 3,
-      };
       const enemyBox = {
         x: e.x,
         y: e.y,
         width: FRAME_WIDTH - SPRITE_PADDING * 3,
         height: FRAME_HEIGHT - SPRITE_PADDING * 3,
       };
-      if (rectsOverlap(playerBox, enemyBox)) {
-        const side = collisionSide(playerBox, enemyBox);
-        if (e.state === "walk") {
-          const stompKill = side === "top" && player.vy > 0;
-          if (player.attacking || stompKill) {
-            e.state = "hit";
-            playEnemyKillSound();
-            score += 1;
-            enemyKillCount++;
-            if (enemyKillCount % 3 === 0) {
-              healthPacks.push(new HealthPack(e.x, e.y));
+      if (health > 0) {
+        const playerBox = {
+          x: player.x,
+          y: player.y,
+          width: FRAME_WIDTH - SPRITE_PADDING * 3,
+          height: FRAME_HEIGHT - SPRITE_PADDING * 3,
+        };
+        if (rectsOverlap(playerBox, enemyBox)) {
+          const side = collisionSide(playerBox, enemyBox);
+          if (e.state === "walk") {
+            const stompKill = side === "top" && player.vy > 0;
+            if (player.attacking || stompKill) {
+              e.state = "hit";
+              playEnemyKillSound();
+              score += 1;
+              enemyKillCount++;
+              if (enemyKillCount % 3 === 0) {
+                healthPacks.push(new HealthPack(e.x, e.y));
+              }
+              if (stompKill) {
+                player.vy = -10;
+                player.jumping = true;
+              }
+            } else if (side !== "top" && !player.attacking && !player.invincible) {
+              player.hit();
             }
-            if (stompKill) {
-              player.vy = -10;
-              player.jumping = true;
+          }
+        }
+      }
+      if (twoPlayerMode && health2 > 0) {
+        const p2Box = {
+          x: player2.x,
+          y: player2.y,
+          width: FRAME_WIDTH - SPRITE_PADDING * 3,
+          height: FRAME_HEIGHT - SPRITE_PADDING * 3,
+        };
+        if (rectsOverlap(p2Box, enemyBox)) {
+          const side2 = collisionSide(p2Box, enemyBox);
+          if (e.state === "walk") {
+            const stomp2 = side2 === "top" && player2.vy > 0;
+            if (player2.attacking || stomp2) {
+              e.state = "hit";
+              playEnemyKillSound();
+              score += 1;
+              enemyKillCount++;
+              if (enemyKillCount % 3 === 0) {
+                healthPacks.push(new HealthPack(e.x, e.y));
+              }
+              if (stomp2) {
+                player2.vy = -10;
+                player2.jumping = true;
+              }
+            } else if (side2 !== "top" && !player2.attacking && !player2.invincible) {
+              player2.hit();
             }
-          } else if (side !== "top" && !player.attacking && !player.invincible) {
-            player.hit();
           }
         }
       }
@@ -1137,6 +1300,7 @@
     }
 
     player.draw();
+    if (twoPlayerMode) player2.draw();
     enemies.forEach(e => e.draw());
     healthPacks.forEach(hp => hp.update());
     healthPacks.forEach(hp => hp.draw());
@@ -1147,12 +1311,6 @@
     // Update and filter health packs
     const now = Date.now();
     healthPacks = healthPacks.filter(hp => {
-      const playerBox = {
-        x: player.x,
-        y: player.y,
-        width: player.width,
-        height: player.height,
-      };
       const packBox = {
         x: hp.x - hp.radius,
         y: hp.y - hp.radius,
@@ -1160,13 +1318,35 @@
         height: hp.radius * 2,
       };
 
-      if (rectsOverlap(playerBox, packBox)) {
-        health++;
-        playHealthPackSound();
-        return false; // Remove pack
+      if (health > 0) {
+        const p1Box = {
+          x: player.x,
+          y: player.y,
+          width: player.width,
+          height: player.height,
+        };
+        if (rectsOverlap(p1Box, packBox)) {
+          health++;
+          playHealthPackSound();
+          return false;
+        }
       }
 
-      return now - hp.createdAt < 500; // Keep pack if less than 0.5s old
+      if (twoPlayerMode && health2 > 0) {
+        const p2Box = {
+          x: player2.x,
+          y: player2.y,
+          width: player2.width,
+          height: player2.height,
+        };
+        if (rectsOverlap(p2Box, packBox)) {
+          health2++;
+          playHealthPackSound();
+          return false;
+        }
+      }
+
+      return now - hp.createdAt < 500;
     });
 
     drawScore();
@@ -1181,7 +1361,7 @@
       animationId = requestAnimationFrame(gameLoop);
     } else {
       if (autoplaying) {
-        startDemo();
+        startDemo(demoPreserve);
         initGame();
       } else {
         showGameOver();
@@ -1235,6 +1415,15 @@
     }
 
     if (characterSelectionVisible) {
+      if (
+        x >= twoPlayerButtonRect.x &&
+        x <= twoPlayerButtonRect.x + twoPlayerButtonRect.width &&
+        y >= twoPlayerButtonRect.y &&
+        y <= twoPlayerButtonRect.y + twoPlayerButtonRect.height
+      ) {
+        twoPlayerSelected = !twoPlayerSelected;
+        return;
+      }
       for (const btn of characterButtonRects) {
         if (
           x >= btn.x &&
@@ -1242,7 +1431,15 @@
           y >= btn.y &&
           y <= btn.y + btn.height
         ) {
-          startGame(btn.name);
+          if (twoPlayerSelected && selectingPlayer === 1) {
+            selectedCharacter1 = btn.name;
+            showCharacterSelection(2);
+          } else if (twoPlayerSelected && selectingPlayer === 2) {
+            selectedCharacter2 = btn.name;
+            startGame(selectedCharacter1, selectedCharacter2);
+          } else {
+            startGame(btn.name);
+          }
           break;
         }
       }
@@ -1262,6 +1459,10 @@
         pauseSnapshot = null;
         totalPausedTime += Date.now() - pauseStartTime;
       }
+      if (twoPlayerMode) {
+        twoPlayerMode = false;
+      }
+      twoPlayerSelected = false;
       resetGame();
     }
   });
@@ -1343,7 +1544,7 @@
       img.onload = () => {
         loaded++;
         if (loaded === total) {
-          showCharacterSelection();
+          showCharacterSelection(1);
         }
       };
       spriteCache[char.toLowerCase()] = img;
@@ -1352,14 +1553,14 @@
     alphabetSprite.onload = () => {
       loaded++;
       if (loaded === total) {
-        showCharacterSelection();
+        showCharacterSelection(1);
       }
     };
     numbersSprite.src = "assets/images/sprite-numbers.png";
     numbersSprite.onload = () => {
       loaded++;
       if (loaded === total) {
-        showCharacterSelection();
+        showCharacterSelection(1);
       }
     };
   }
@@ -1369,6 +1570,8 @@
   Game.qualifiesForHighScore = qualifiesForHighScore;
   Game.loadHighScores = loadHighScores;
   Game.saveHighScores = saveHighScores;
+  Game.setTwoPlayerMode = v => { twoPlayerMode = v; };
+  Game.getTwoPlayerMode = () => twoPlayerMode;
   // Testing helpers
   Game._getHealthForTest = () => health;
   Game._setHealthForTest = (v) => { health = v; };
