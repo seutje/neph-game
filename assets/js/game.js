@@ -148,8 +148,9 @@
   const TREE_TRUNK_WIDTH = 30;
   const TREE_TRUNK_HEIGHT = 60;
   const TREE_CANOPY_SIZE = 60;
-  const TREE_MIN_SPACING = 180;
-  const TREE_MAX_SPACING = 250;
+  // increase spacing so trees appear less frequently
+  const TREE_MIN_SPACING = 360;
+  const TREE_MAX_SPACING = 500;
   const GROUND_SURFACE_Y = groundY - SPRITE_PADDING + FRAME_HEIGHT;
   const ATTACK_DURATION_FRAMES = 12; // 0.2s at 60fps
   const ATTACK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
