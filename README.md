@@ -27,7 +27,7 @@ This repository contains a small browser-based platform game.
 - **Enemy AI** – Enemies walk, jump, fall into pits and die when hit or stomped.
 - **Health system** – Start with three hearts. Every third defeated enemy drops a health pack.
 - **Score & high scores** – Earn points for killing enemies. The top five scores are stored locally in your browser.
-- **Pause functionality** – Press <kbd>P</kbd> at any time to pause the game. The pause screen includes a restart button.
+- **Pause functionality** – Press <kbd>P</kbd> at any time to pause the game. The pause screen includes a restart button and the game now automatically pauses when the browser tab loses focus.
 - **Chiptune music and sound effects** – Background music and SFX with adjustable volume sliders.
 - **Keyboard-only controls** – All interaction is via the keyboard, making the game easy to pick up.
 

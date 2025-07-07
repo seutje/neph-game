@@ -143,6 +143,7 @@
   let gameOver = false;
   let animationId;
   let paused = false;
+  let autoPaused = false;
 
   // Web Audio API setup for simple chiptune background music
   let audioCtx;
@@ -617,6 +618,26 @@
       keys[k] = false;
     }
   }
+
+  function pauseGame() {
+    if (paused || gameOver) return;
+    paused = true;
+    pauseStartTime = Date.now();
+    cancelAnimationFrame(animationId);
+    pauseSnapshot = document.createElement("canvas");
+    pauseSnapshot.width = canvas.width;
+    pauseSnapshot.height = canvas.height;
+    pauseSnapshot.getContext("2d").drawImage(canvas, 0, 0);
+    drawPauseScreen();
+  }
+
+  function resumeGame() {
+    if (!paused || gameOver) return;
+    paused = false;
+    pauseSnapshot = null;
+    totalPausedTime += Date.now() - pauseStartTime;
+    animationId = requestAnimationFrame(gameLoop);
+  }
   document.addEventListener("keydown", e => {
     if (awaitingNameEntry) {
       if (e.key === "Backspace") {
@@ -634,19 +655,10 @@
     }
     if (e.key.toLowerCase() === "p") {
       if (!gameOver) {
-        paused = !paused;
         if (paused) {
-          pauseStartTime = Date.now();
-          cancelAnimationFrame(animationId);
-          pauseSnapshot = document.createElement("canvas");
-          pauseSnapshot.width = canvas.width;
-          pauseSnapshot.height = canvas.height;
-          pauseSnapshot.getContext("2d").drawImage(canvas, 0, 0);
-          drawPauseScreen();
+          resumeGame();
         } else {
-          pauseSnapshot = null;
-          totalPausedTime += Date.now() - pauseStartTime;
-          animationId = requestAnimationFrame(gameLoop);
+          pauseGame();
         }
       }
     } else {
@@ -1302,6 +1314,18 @@
   document.addEventListener("mouseup", () => {
     draggingSlider = null;
     if (paused) drawPauseScreen();
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (!paused && !gameOver) {
+        autoPaused = true;
+        pauseGame();
+      }
+    } else if (autoPaused) {
+      autoPaused = false;
+      resumeGame();
+    }
   });
 
 
