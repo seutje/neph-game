@@ -757,12 +757,10 @@
   function drawHealth() {
     ctx.fillStyle = "black";
     if (twoPlayerMode) {
-      drawSpriteText(
-        `P1 ${health} P2 ${health2}`,
-        canvas.width - 10,
-        10,
-        "right"
-      );
+      const x = canvas.width - 10;
+      const lineHeight = DRAW_CHAR_HEIGHT + 4;
+      drawSpriteText(`P1 ${health}`, x, 10, "right");
+      drawSpriteText(`P2 ${health2}`, x, 10 + lineHeight, "right");
     } else {
       drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
     }
