@@ -157,6 +157,12 @@
   // increase spacing so trees appear less frequently
   const TREE_MIN_SPACING = 360;
   const TREE_MAX_SPACING = 500;
+  let bushes = [];
+  const BUSH_WIDTH = 40;
+  const BUSH_HEIGHT = 20;
+  const BERRY_SIZE = 4;
+  const BUSH_MIN_SPACING = 200;
+  const BUSH_MAX_SPACING = 350;
   const GROUND_SURFACE_Y = groundY - SPRITE_PADDING + FRAME_HEIGHT;
   const ATTACK_DURATION_FRAMES = 12; // 0.2s at 60fps
   const ATTACK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
@@ -846,14 +852,61 @@
       const trunkY = GROUND_SURFACE_Y - TREE_TRUNK_HEIGHT;
       ctx.fillStyle = "brown";
       ctx.fillRect(trunkX, trunkY, TREE_TRUNK_WIDTH, TREE_TRUNK_HEIGHT);
-      ctx.strokeStyle = "black";
-      ctx.strokeRect(trunkX, trunkY, TREE_TRUNK_WIDTH, TREE_TRUNK_HEIGHT);
       const canopyX = t.x - TREE_CANOPY_SIZE / 2;
       const canopyY = trunkY - TREE_CANOPY_SIZE;
       ctx.fillStyle = "green";
       ctx.fillRect(canopyX, canopyY, TREE_CANOPY_SIZE, TREE_CANOPY_SIZE);
-      ctx.strokeStyle = "black";
-      ctx.strokeRect(canopyX, canopyY, TREE_CANOPY_SIZE, TREE_CANOPY_SIZE);
+      // canopy and trunk no longer outlined
+    });
+    ctx.restore();
+  }
+
+  function initBushes() {
+    bushes.length = 0;
+    let x = 80;
+    while (x < canvas.width * 2) {
+      const gap = gaps.find(g => x >= g.x && x <= g.x + g.width);
+      if (!gap) {
+        bushes.push({ x });
+        x += BUSH_MIN_SPACING + Math.random() * (BUSH_MAX_SPACING - BUSH_MIN_SPACING);
+      } else {
+        x = gap.x + gap.width + BUSH_MIN_SPACING;
+      }
+    }
+  }
+
+  function updateBushes() {
+    bushes.forEach(b => {
+      b.x += worldSpeed;
+    });
+    bushes = bushes.filter(b => b.x + BUSH_WIDTH > 0);
+    let lastX = bushes.length ? bushes[bushes.length - 1].x : 0;
+    while (lastX < canvas.width * 2) {
+      lastX += BUSH_MIN_SPACING + Math.random() * (BUSH_MAX_SPACING - BUSH_MIN_SPACING);
+      const gap = gaps.find(g => lastX >= g.x && lastX <= g.x + g.width);
+      if (gap) {
+        lastX = gap.x + gap.width + BUSH_MIN_SPACING;
+      }
+      bushes.push({ x: lastX });
+    }
+  }
+
+  function drawBushes() {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = "green";
+    bushes.forEach(b => {
+      const bx = b.x - BUSH_WIDTH / 2;
+      const by = GROUND_SURFACE_Y - BUSH_HEIGHT;
+      ctx.fillRect(bx, by, BUSH_WIDTH, BUSH_HEIGHT);
+      ctx.fillStyle = "red";
+      for (let i = 0; i < 3; i++) {
+        const berryX = bx + (i + 1) * (BUSH_WIDTH / 4) - BERRY_SIZE / 2;
+        let berryY = by + BUSH_HEIGHT / 3;
+        if (i === 1) berryY += 2; // middle berry slightly lower
+        ctx.fillRect(berryX, berryY, BERRY_SIZE, BERRY_SIZE);
+      }
+      ctx.fillStyle = "green";
     });
     ctx.restore();
   }
@@ -960,6 +1013,7 @@
     }
     initTerrain();
     initTrees();
+    initBushes();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     lastFrameTime = performance.now();
     gameLoop();
@@ -1136,8 +1190,10 @@
 
     updateTerrain();
     updateTrees();
+    updateBushes();
     drawGround();
     drawTrees();
+    drawBushes();
 
     enemies.forEach(e => {
       const enemyBox = {
