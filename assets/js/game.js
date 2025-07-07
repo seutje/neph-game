@@ -1,5 +1,13 @@
 (() => {
-  const Game = {};
+  const Game = window.Game || (window.Game = {});
+  const {
+    rectsOverlap,
+    collisionSide,
+    loadHighScores,
+    saveHighScores,
+    qualifiesForHighScore,
+    MAX_HIGH_SCORES,
+  } = Game;
 
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
@@ -22,12 +30,8 @@
   let selectedCharacter2 = "Turf";
   let selectingPlayer = 1;
   let twoPlayerSelected = false;
-  let autoplaying = false;
+  Game.autoplaying = false;
   let demoPreserve = false;
-  function audioEnabled() {
-    return !autoplaying;
-  }
-  const MAX_HIGH_SCORES = 5;
 
   const characters = ["Neph", "Turf", "Seuge", "Jerp", "Smonk", "Nitro", "Zenia", "Beerceps"];
   const spriteCache = {};
@@ -162,157 +166,6 @@
     }
   }
 
-  // Web Audio API setup for simple chiptune background music
-  let audioCtx;
-  let musicInterval;
-  let musicVolume = 0.01;
-  let sfxVolume = 0.01;
-  const musicNotes = [
-    // set 1: original melody
-    130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
-    // set 2: repeat
-    130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
-    // set 3: reversed
-    164.82, 196.0, 220.0, 196.0, 174.62, 164.82, 146.83, 130.81,
-    // set 4: alternate progression
-    196.0, 220.0, 246.94, 220.0, 196.0, 174.62, 164.82, 146.83,
-    // set 5: one octave higher
-    261.63, 293.66, 329.63, 349.23, 392.0, 440.0, 392.0, 329.63,
-    // set 6: octave high reversed
-    329.63, 392.0, 440.0, 392.0, 349.23, 329.63, 293.66, 261.63,
-    // set 7: return to original
-    130.81, 146.83, 164.82, 174.62, 196.0, 220.0, 196.0, 164.82,
-    // set 8: reversed to finish
-    164.82, 196.0, 220.0, 196.0, 174.62, 164.82, 146.83, 130.81
-  ];
-
-  function playNote(freq, duration = 0.3, volume = musicVolume) {
-    if (!audioEnabled() || !audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "square";
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 0.01);
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration);
-    osc.stop(audioCtx.currentTime + duration);
-  }
-
-  function playKick(volume = musicVolume) {
-    if (!audioEnabled() || !audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "sine";
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(volume * 10, audioCtx.currentTime + 0.01);
-    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-    osc.stop(audioCtx.currentTime + 0.11);
-  }
-
-  function playSnare(volume = musicVolume) {
-    if (!audioEnabled() || !audioCtx) return;
-    const bufferSize = audioCtx.sampleRate * 0.2;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = "highpass";
-    filter.frequency.setValueAtTime(800, audioCtx.currentTime);
-    const gain = audioCtx.createGain();
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(volume * 5, audioCtx.currentTime + 0.01);
-    noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(audioCtx.destination);
-    noise.start();
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-    noise.stop(audioCtx.currentTime + 0.2);
-  }
-
-  function startBackgroundMusic() {
-    if (!audioEnabled()) {
-      return;
-    }
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === "suspended") {
-      audioCtx.resume();
-    }
-    let idx = 0;
-    let beat = 0;
-    clearInterval(musicInterval);
-    musicInterval = setInterval(() => {
-      playNote(musicNotes[idx % musicNotes.length], 0.3, musicVolume);
-      if (beat % 4 === 0) {
-        playKick(musicVolume);
-      } else if (beat % 4 === 2) {
-        playSnare(musicVolume);
-      }
-      idx++;
-      beat++;
-    }, 300);
-  }
-
-  function playJumpSound() {
-    if (!audioEnabled()) return;
-    // quick up-beep
-    playNote(329.63, 0.1, sfxVolume);
-  }
-
-  function playAttackSound() {
-    if (!audioEnabled()) return;
-    // short lower tone for attack
-    playNote(261.63, 0.1, sfxVolume);
-  }
-
-  function playDamageSound() {
-    if (!audioEnabled()) return;
-    // deeper tone when taking damage
-    playNote(196.0, 0.1, sfxVolume);
-  }
-
-  function playHealthPackSound() {
-    if (!audioEnabled()) return;
-    // quick ascending tones for picking up health
-    playNote(392.0, 0.07, sfxVolume);
-    setTimeout(() => playNote(523.25, 0.07, sfxVolume), 70);
-  }
-
-  function playEnemyKillSound() {
-    if (!audioEnabled()) return;
-    // two descending tones for killing an enemy
-    playNote(329.63, 0.1, sfxVolume);
-    setTimeout(() => playNote(261.63, 0.1, sfxVolume), 100);
-  }
-
-  function playDeathSound() {
-    if (!audioEnabled()) return;
-    // descending tones when the player dies
-    playNote(261.63, 0.15, sfxVolume);
-    setTimeout(() => playNote(196.0, 0.15, sfxVolume), 150);
-    setTimeout(() => playNote(130.81, 0.15, sfxVolume), 300);
-    setTimeout(() => playNote(98.0, 0.15, sfxVolume), 450);
-  }
-
-  function stopBackgroundMusic() {
-    if (musicInterval) {
-      clearInterval(musicInterval);
-      musicInterval = null;
-    }
-  }
 
   const MAX_FPS = 60;
   const FRAME_DURATION = 1000 / MAX_FPS;
@@ -350,32 +203,6 @@
     }
   }
 
-  function rectsOverlap(a, b) {
-    return (
-      a.x < b.x + b.width &&
-      a.x + a.width > b.x &&
-      a.y < b.y + b.height &&
-      a.y + a.height > b.y
-    );
-  }
-
-  function collisionSide(a, b) {
-    const dx = a.x + a.width / 2 - (b.x + b.width / 2);
-    const dy = a.y + a.height / 2 - (b.y + b.height / 2);
-    const width = (a.width + b.width) / 2;
-    const height = (a.height + b.height) / 2;
-    if (Math.abs(dx) <= width && Math.abs(dy) <= height) {
-      const wy = width * dy;
-      const hx = height * dx;
-      // Canvas coordinates increase downward, so flip the vertical checks
-      if (wy > hx) {
-        return wy > -hx ? "bottom" : "left";
-      } else {
-        return wy > -hx ? "right" : "top";
-      }
-    }
-    return null;
-  }
   function createPlayer(getHealth, setHealth, spriteImg) {
     return {
       sprite: spriteImg,
@@ -401,7 +228,7 @@
         if (!this.attacking && this.cooldown <= 0) {
           this.attacking = true;
           this.attackTimer = ATTACK_DURATION_FRAMES;
-          playAttackSound();
+          Game.playAttackSound();
         }
       },
       block() {
@@ -524,7 +351,7 @@
           }
           this.vy = -8;
           this.jumping = true;
-          playDamageSound();
+          Game.playDamageSound();
           if (willDie) {
             maybeEndGame();
           }
@@ -721,13 +548,6 @@
 
   let enemies = [];
   let spawnTimer = 0;
-  function loadHighScores() {
-    return JSON.parse(localStorage.getItem("highScores") || "[]");
-  }
-
-  function saveHighScores(scores) {
-    localStorage.setItem("highScores", JSON.stringify(scores));
-  }
 
   function autoPlayAI() {
     player.vx = PLAYER_SPEED;
@@ -737,7 +557,7 @@
     if (gapAhead && !player.jumping) {
       player.vy = -10;
       player.jumping = true;
-      playJumpSound();
+      Game.playJumpSound();
     }
     const enemyAhead = enemies.find(e => e.x > player.x && e.x - player.x < lookAhead && e.state === "walk");
     if (enemyAhead && !player.attacking) {
@@ -745,10 +565,6 @@
     }
   }
 
-  function qualifiesForHighScore(s) {
-    const scores = loadHighScores();
-    return scores.length < MAX_HIGH_SCORES || s > scores[scores.length - 1].score;
-  }
   function drawScore() {
     ctx.fillStyle = "black";
     drawSpriteText("SCORE " + score, 10, 10, "left");
@@ -983,8 +799,8 @@
   }
 
   function showGameOver() {
-    stopBackgroundMusic();
-    playDeathSound();
+    Game.stopBackgroundMusic();
+    Game.playDeathSound();
     gameOverScores = loadHighScores();
     awaitingNameEntry = qualifiesForHighScore(score);
     if (awaitingNameEntry) {
@@ -1009,7 +825,7 @@
     restartButtonRect = null;
     awaitingNameEntry = false;
     enteredName = "";
-    stopBackgroundMusic();
+    Game.stopBackgroundMusic();
     showCharacterSelection(1);
   }
 
@@ -1063,7 +879,7 @@
       return; // keep demo running in the background
     }
     cancelAnimationFrame(animationId);
-    autoplaying = false;
+    Game.autoplaying = false;
     startDemo(playerIndex !== 1);
   }
 
@@ -1082,9 +898,9 @@
     characterSelectionVisible = false;
     canvas.style.display = "block";
     showVolume = true;
-    sliders.sfx.value = sfxVolume;
-    sliders.music.value = musicVolume;
-    autoplaying = false;
+    sliders.sfx.value = Game.sfxVolume;
+    sliders.music.value = Game.musicVolume;
+    Game.autoplaying = false;
     resetKeys();
     // Reset timing so regular play always begins at base speed
     gameStartTime = Date.now();
@@ -1092,7 +908,7 @@
     // Ensure player velocity is cleared when starting real play
     player.vx = 0;
     player.vy = 0;
-    startBackgroundMusic();
+    Game.startBackgroundMusic();
     if (alreadyLoaded) {
       initGame();
     }
@@ -1108,10 +924,10 @@
     const spritePath = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
-    autoplaying = true;
+    Game.autoplaying = true;
     showVolume = false;
     resetKeys();
-    stopBackgroundMusic();
+    Game.stopBackgroundMusic();
     // Reset time tracking so world speed starts from the baseline
     gameStartTime = Date.now();
     worldSpeed = 0;
@@ -1170,7 +986,7 @@
       worldSpeed -= player.vx;
     }
 
-    if (autoplaying) {
+    if (Game.autoplaying) {
       autoPlayAI();
     } else {
       if (keys["ArrowLeft"]) {
@@ -1188,7 +1004,7 @@
       if ((keys["ArrowUp"] || (!twoPlayerMode && (keys["w"] || keys["z"]))) && !player.jumping) {
         player.vy = -10;
         player.jumping = true;
-        playJumpSound();
+        Game.playJumpSound();
       }
 
       if (twoPlayerMode) {
@@ -1203,7 +1019,7 @@
         if ((keys["w"] || keys["z"]) && !player2.jumping) {
           player2.vy = -10;
           player2.jumping = true;
-          playJumpSound();
+          Game.playJumpSound();
         }
       }
     }
@@ -1242,7 +1058,7 @@
             const stompKill = side === "top" && player.vy > 0;
             if (player.attacking || stompKill) {
               e.state = "hit";
-              playEnemyKillSound();
+              Game.playEnemyKillSound();
               score += 1;
               enemyKillCount++;
               if (enemyKillCount % 3 === 0) {
@@ -1271,7 +1087,7 @@
             const stomp2 = side2 === "top" && player2.vy > 0;
             if (player2.attacking || stomp2) {
               e.state = "hit";
-              playEnemyKillSound();
+              Game.playEnemyKillSound();
               score += 1;
               enemyKillCount++;
               if (enemyKillCount % 3 === 0) {
@@ -1325,7 +1141,7 @@
         };
         if (rectsOverlap(p1Box, packBox)) {
           health++;
-          playHealthPackSound();
+          Game.playHealthPackSound();
           return false;
         }
       }
@@ -1339,7 +1155,7 @@
         };
         if (rectsOverlap(p2Box, packBox)) {
           health2++;
-          playHealthPackSound();
+          Game.playHealthPackSound();
           return false;
         }
       }
@@ -1358,7 +1174,7 @@
     if (!gameOver) {
       animationId = requestAnimationFrame(gameLoop);
     } else {
-      if (autoplaying) {
+      if (Game.autoplaying) {
         startDemo(demoPreserve);
         initGame();
       } else {
@@ -1400,13 +1216,13 @@
     if (showVolume) {
       if (sliderHit(sliders.sfx)) {
         sliders.sfx.value = ((x - sliders.sfx.x) / sliders.sfx.width) * 0.1;
-        sfxVolume = sliders.sfx.value;
+        Game.sfxVolume = sliders.sfx.value;
         if (paused) drawPauseScreen();
         return;
       }
       if (sliderHit(sliders.music)) {
         sliders.music.value = ((x - sliders.music.x) / sliders.music.width) * 0.1;
-        musicVolume = sliders.music.value;
+        Game.musicVolume = sliders.music.value;
         if (paused) drawPauseScreen();
         return;
       }
@@ -1484,12 +1300,12 @@
       if (sliderHit(sliders.sfx)) {
         draggingSlider = sliders.sfx;
         draggingSlider.value = ((x - draggingSlider.x) / draggingSlider.width) * 0.1;
-        sfxVolume = draggingSlider.value;
+        Game.sfxVolume = draggingSlider.value;
         if (paused) drawPauseScreen();
       } else if (sliderHit(sliders.music)) {
         draggingSlider = sliders.music;
         draggingSlider.value = ((x - draggingSlider.x) / draggingSlider.width) * 0.1;
-        musicVolume = draggingSlider.value;
+        Game.musicVolume = draggingSlider.value;
         if (paused) drawPauseScreen();
       }
     }
@@ -1503,9 +1319,9 @@
     draggingSlider.value = ((x - draggingSlider.x) / draggingSlider.width) * 0.1;
     draggingSlider.value = Math.max(0, Math.min(0.1, draggingSlider.value));
     if (draggingSlider === sliders.sfx) {
-      sfxVolume = draggingSlider.value;
+      Game.sfxVolume = draggingSlider.value;
     } else {
-      musicVolume = draggingSlider.value;
+      Game.musicVolume = draggingSlider.value;
     }
     if (paused) drawPauseScreen();
   });
@@ -1563,11 +1379,6 @@
     };
   }
 
-  Game.rectsOverlap = rectsOverlap;
-  Game.collisionSide = collisionSide;
-  Game.qualifiesForHighScore = qualifiesForHighScore;
-  Game.loadHighScores = loadHighScores;
-  Game.saveHighScores = saveHighScores;
   Game.setTwoPlayerMode = v => { twoPlayerMode = v; };
   Game.getTwoPlayerMode = () => twoPlayerMode;
   // Testing helpers

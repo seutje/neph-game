@@ -79,11 +79,14 @@ function loadGameDom() {
   };
 
   // Load the game script manually so tests can access globals
-  const scriptText = fs.readFileSync(
-    path.join(__dirname, '../assets/js/game.js'),
-    'utf8'
-  );
-  dom.window.eval(scriptText);
+  const scripts = ['util.js', 'audio.js', 'game.js'];
+  for (const file of scripts) {
+    const scriptText = fs.readFileSync(
+      path.join(__dirname, '../assets/js/', file),
+      'utf8'
+    );
+    dom.window.eval(scriptText);
+  }
 
   return new Promise((resolve, reject) => {
     dom.window.addEventListener('error', (e) => reject(e.error || e.message));
