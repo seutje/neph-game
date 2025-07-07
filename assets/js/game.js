@@ -892,6 +892,8 @@
   }
 
   function drawBushes() {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
     ctx.fillStyle = "green";
     bushes.forEach(b => {
       const bx = b.x - BUSH_WIDTH / 2;
@@ -900,11 +902,13 @@
       ctx.fillStyle = "red";
       for (let i = 0; i < 3; i++) {
         const berryX = bx + (i + 1) * (BUSH_WIDTH / 4) - BERRY_SIZE / 2;
-        const berryY = by + BUSH_HEIGHT / 3;
+        let berryY = by + BUSH_HEIGHT / 3;
+        if (i === 1) berryY += 2; // middle berry slightly lower
         ctx.fillRect(berryX, berryY, BERRY_SIZE, BERRY_SIZE);
       }
       ctx.fillStyle = "green";
     });
+    ctx.restore();
   }
 
   function generateGaps() {
