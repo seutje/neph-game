@@ -233,6 +233,7 @@
       invincible: false,
       invincibility: 0,
       touchingLeft: false,
+      fellInGap: false,
       attack() {
         if (!this.attacking && this.cooldown <= 0) {
           this.attacking = true;
@@ -282,10 +283,12 @@
         if (this.y >= groundY) {
           const centerX = this.x + this.width / 2;
           const overGap = gaps.some(g => centerX >= g.x && centerX <= g.x + g.width);
-          if (!overGap) {
+          if (!overGap && !this.fellInGap) {
             this.y = groundY;
             this.vy = 0;
             this.jumping = false;
+          } else {
+            this.fellInGap = this.fellInGap || overGap;
           }
         }
         if (this.y > canvas.height) {
@@ -385,6 +388,7 @@
       this.frame = 0;
       this.state = "walk";
       this.deathTime = null; // time when the enemy entered the dead state
+      this.fellInGap = false;
     }
     update() {
       if (this.state === "walk") {
@@ -408,10 +412,12 @@
           const startX = Math.min(prevCenterX, newCenterX);
           const endX = Math.max(prevCenterX, newCenterX);
           const overGap = gaps.some(g => endX >= g.x && startX <= g.x + g.width);
-          if (!overGap && prevY <= groundY) {
+          if (!overGap && !this.fellInGap && prevY <= groundY) {
             this.y = groundY;
             this.vy = 0;
             this.jumping = false;
+          } else {
+            this.fellInGap = this.fellInGap || overGap;
           }
         }
         if (this.y > canvas.height) {
@@ -905,6 +911,7 @@
     player.vx = 0;
     player.vy = 0;
     player.jumping = false;
+    player.fellInGap = false;
     player.attacking = false;
     player.attackTimer = 0;
     player.cooldown = 0;
@@ -915,6 +922,7 @@
       player2.vx = 0;
       player2.vy = 0;
       player2.jumping = false;
+      player2.fellInGap = false;
       player2.attacking = false;
       player2.attackTimer = 0;
       player2.cooldown = 0;
@@ -1129,6 +1137,7 @@
               if (stompKill) {
                 player.vy = -10;
                 player.jumping = true;
+                player.fellInGap = false;
               }
             } else if (side !== "top" && !player.attacking && !player.invincible) {
               player.hit();
@@ -1158,6 +1167,7 @@
               if (stomp2) {
                 player2.vy = -10;
                 player2.jumping = true;
+                player2.fellInGap = false;
               }
             } else if (side2 !== "top" && !player2.attacking && !player2.invincible) {
               player2.hit();
