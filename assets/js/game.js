@@ -29,7 +29,8 @@
   const spriteCache = {};
 
   const gravity = 0.5;
-  const groundY = 250;
+  // Raised ground level by 30px
+  const groundY = 220;
   const CLOUD_SPEED = 0.2;
   let worldSpeed = 0;
 
