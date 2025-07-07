@@ -3,7 +3,7 @@ const path = require('path');
 const { JSDOM } = require('jsdom');
 
 test('game.js runs without errors', () => {
-  const html = fs.readFileSync(path.join(__dirname, '../game.html'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
   const dom = new JSDOM(html, {
     runScripts: 'dangerously',
     resources: 'usable',
