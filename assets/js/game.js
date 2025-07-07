@@ -491,13 +491,16 @@
     },
     hit() {
       if (!this.invincible && !this.blocking) {
-        this.invincible = true;
-        this.invincibility = 60;
+        health--;
+        const willDie = health < 1;
+        if (!willDie) {
+          this.invincible = true;
+          this.invincibility = 60;
+        }
         this.vy = -8;
         this.jumping = true;
-        health--;
         playDamageSound();
-        if (health < 1) {
+        if (willDie) {
           gameOver = true;
         }
       }
