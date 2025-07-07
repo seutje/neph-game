@@ -1060,7 +1060,10 @@
     showVolume = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     buildCharacterButtonRects();
-    startDemo(playerIndex !== 1);
+    autoplaying = false;
+    if (!(twoPlayerMode && playerIndex === 2)) {
+      startDemo(playerIndex !== 1);
+    }
   }
 
   function startGame(character, character2 = selectedCharacter2) {
