@@ -140,6 +140,8 @@
   const BLOCK_COOLDOWN_FRAMES = 6;  // 0.1s at 60fps
   let score = 0;
   let health = 3;
+  let health2 = 3;
+  let twoPlayerMode = false;
   let gameOver = false;
   let animationId;
   let paused = false;
@@ -359,155 +361,161 @@
     }
     return null;
   }
-  const player = {
-    x: 50,
-    y: groundY,
-    width: 64,
-    height: 85,
-    vx: 0,
-    vy: 0,
-    frame: 0,
-    direction: 1,
-    jumping: false,
-    attacking: false,
-    blocking: false,
-    attackTimer: 0,
-    cooldown: 0,
-    blockTimer: 0,
-    blockCooldown: 0,
-    invincible: false,
-    invincibility: 0,
-    touchingLeft: false,
-    attack() {
-      if (!this.attacking && this.cooldown <= 0) {
-        this.attacking = true;
-        this.attackTimer = ATTACK_DURATION_FRAMES;
-        playAttackSound();
-      }
-    },
-    block() {
-      if (!this.blocking && this.blockCooldown <= 0) {
-        this.blocking = true;
-        this.blockTimer = BLOCK_DURATION_FRAMES;
-      }
-    },
-    update() {
-      if (this.invincible) {
-        this.invincibility--;
-        if (this.invincibility <= 0) {
-          this.invincible = false;
+  function createPlayer(getHealth, setHealth) {
+    return {
+      x: 50,
+      y: groundY,
+      width: 64,
+      height: 85,
+      vx: 0,
+      vy: 0,
+      frame: 0,
+      direction: 1,
+      jumping: false,
+      attacking: false,
+      blocking: false,
+      attackTimer: 0,
+      cooldown: 0,
+      blockTimer: 0,
+      blockCooldown: 0,
+      invincible: false,
+      invincibility: 0,
+      touchingLeft: false,
+      attack() {
+        if (!this.attacking && this.cooldown <= 0) {
+          this.attacking = true;
+          this.attackTimer = ATTACK_DURATION_FRAMES;
+          playAttackSound();
         }
-      }
-      if (this.attacking) {
-        this.attackTimer--;
-        if (this.attackTimer <= 0) {
-          this.attacking = false;
-          this.cooldown = ATTACK_COOLDOWN_FRAMES;
+      },
+      block() {
+        if (!this.blocking && this.blockCooldown <= 0) {
+          this.blocking = true;
+          this.blockTimer = BLOCK_DURATION_FRAMES;
         }
-      } else if (this.cooldown > 0) {
-        this.cooldown--;
-      }
+      },
+      update() {
+        if (this.invincible) {
+          this.invincibility--;
+          if (this.invincibility <= 0) {
+            this.invincible = false;
+          }
+        }
+        if (this.attacking) {
+          this.attackTimer--;
+          if (this.attackTimer <= 0) {
+            this.attacking = false;
+            this.cooldown = ATTACK_COOLDOWN_FRAMES;
+          }
+        } else if (this.cooldown > 0) {
+          this.cooldown--;
+        }
 
-      if (this.blocking) {
-        this.blockTimer--;
-        if (this.blockTimer <= 0) {
-          this.blocking = false;
-          this.blockCooldown = BLOCK_COOLDOWN_FRAMES;
+        if (this.blocking) {
+          this.blockTimer--;
+          if (this.blockTimer <= 0) {
+            this.blocking = false;
+            this.blockCooldown = BLOCK_COOLDOWN_FRAMES;
+          }
+        } else if (this.blockCooldown > 0) {
+          this.blockCooldown--;
         }
-      } else if (this.blockCooldown > 0) {
-        this.blockCooldown--;
-      }
-      this.vy += gravity;
-      this.y += this.vy;
-      if (this.y < 0) {
-        this.y = 0;
-        this.vy = 0;
-      }
-      if (this.y >= groundY) {
-        const centerX = this.x + this.width / 2;
-        const overGap = gaps.some(g => centerX >= g.x && centerX <= g.x + g.width);
-        if (!overGap) {
-          this.y = groundY;
+        this.vy += gravity;
+        this.y += this.vy;
+        if (this.y < 0) {
+          this.y = 0;
           this.vy = 0;
-          this.jumping = false;
         }
-      }
-      if (this.y > canvas.height) {
-        gameOver = true;
-      }
-      this.x += this.vx + worldSpeed;
-      if (this.x < 0) {
-        this.x = 0;
-        if (!this.touchingLeft) {
-          this.touchingLeft = true;
-          this.hit();
+        if (this.y >= groundY) {
+          const centerX = this.x + this.width / 2;
+          const overGap = gaps.some(g => centerX >= g.x && centerX <= g.x + g.width);
+          if (!overGap) {
+            this.y = groundY;
+            this.vy = 0;
+            this.jumping = false;
+          }
         }
-      } else {
-        this.touchingLeft = false;
-        if (this.x + this.width > canvas.width) {
-          this.x = canvas.width - this.width;
-        }
-      }
-    },
-    draw() {
-      let frameY = 0;
-      if (this.attacking) {
-        frameY = 0;
-        this.frame = 3;
-      } else if (this.jumping) {
-        frameY = 0;
-        this.frame = 2;
-      } else if (this.blocking) {
-        frameY = 1;
-        this.frame = 3;
-      } else if (this.vx !== 0) {
-        frameY = 0;
-        this.frame = (this.frame + 0.1) % 3;
-      } else {
-        frameY = 1;
-        this.frame = 0;
-      }
-      if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
-        const yOffset = frameY === 0 ? 6 : 0;
-        ctx.drawImage(
-          sprite,
-          SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
-          SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
-          FRAME_WIDTH,
-          FRAME_HEIGHT,
-          this.x - SPRITE_PADDING,
-          this.y - SPRITE_PADDING + yOffset,
-          FRAME_WIDTH,
-          FRAME_HEIGHT
-        );
-      }
-      if (DEBUG) {
-        ctx.strokeStyle = "lime";
-        ctx.strokeRect(
-          this.x - SPRITE_PADDING,
-          this.y - SPRITE_PADDING,
-          FRAME_WIDTH,
-          FRAME_HEIGHT
-        );
-      }
-    },
-    hit() {
-      if (!this.invincible && !this.blocking) {
-        health = Math.max(0, health - 1);
-        const willDie = health < 1;
-        if (!willDie) {
-          this.invincible = true;
-          this.invincibility = 60;
-        }
-        this.vy = -8;
-        this.jumping = true;
-        playDamageSound();
-        if (willDie) {
+        if (this.y > canvas.height) {
           gameOver = true;
         }
-      }
-    },
-  };
+        this.x += this.vx + worldSpeed;
+        if (this.x < 0) {
+          this.x = 0;
+          if (!this.touchingLeft) {
+            this.touchingLeft = true;
+            this.hit();
+          }
+        } else {
+          this.touchingLeft = false;
+          if (this.x + this.width > canvas.width) {
+            this.x = canvas.width - this.width;
+          }
+        }
+      },
+      draw() {
+        let frameY = 0;
+        if (this.attacking) {
+          frameY = 0;
+          this.frame = 3;
+        } else if (this.jumping) {
+          frameY = 0;
+          this.frame = 2;
+        } else if (this.blocking) {
+          frameY = 1;
+          this.frame = 3;
+        } else if (this.vx !== 0) {
+          frameY = 0;
+          this.frame = (this.frame + 0.1) % 3;
+        } else {
+          frameY = 1;
+          this.frame = 0;
+        }
+        if (!this.invincible || Math.floor(frameCount / 5) % 2 === 0) {
+          const yOffset = frameY === 0 ? 6 : 0;
+          ctx.drawImage(
+            sprite,
+            SHEET_OFFSET_X + Math.floor(this.frame) * FRAME_WIDTH,
+            SHEET_OFFSET_Y + frameY * FRAME_HEIGHT,
+            FRAME_WIDTH,
+            FRAME_HEIGHT,
+            this.x - SPRITE_PADDING,
+            this.y - SPRITE_PADDING + yOffset,
+            FRAME_WIDTH,
+            FRAME_HEIGHT
+          );
+        }
+        if (DEBUG) {
+          ctx.strokeStyle = "lime";
+          ctx.strokeRect(
+            this.x - SPRITE_PADDING,
+            this.y - SPRITE_PADDING,
+            FRAME_WIDTH,
+            FRAME_HEIGHT
+          );
+        }
+      },
+      hit() {
+        if (!this.invincible && !this.blocking) {
+          const newHealth = Math.max(0, getHealth() - 1);
+          setHealth(newHealth);
+          const willDie = newHealth < 1;
+          if (!willDie) {
+            this.invincible = true;
+            this.invincibility = 60;
+          }
+          this.vy = -8;
+          this.jumping = true;
+          playDamageSound();
+          if (willDie) {
+            gameOver = true;
+          }
+        }
+      },
+    };
+  }
+
+  const player = createPlayer(() => health, v => { health = v; });
+  let player2 = createPlayer(() => health2, v => { health2 = v; });
 
   class Enemy {
     constructor(x, character) {
@@ -662,18 +670,34 @@
         }
       }
     } else {
-      if (e.key === " " && !keys[e.key]) {
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (key === " " && !keys[key]) {
         player.attack();
       }
-      if (e.key === "ArrowDown" && !keys[e.key]) {
+      if (key === "Control" && !keys[key]) {
+        if (twoPlayerMode) {
+          player2.attack();
+        } else {
+          player.attack();
+        }
+      }
+      if (key === "ArrowDown" && !keys[key]) {
         player.block();
       }
-      keys[e.key] = true;
+      if (key === "s" && !keys[key]) {
+        if (twoPlayerMode) {
+          player2.block();
+        } else {
+          player.block();
+        }
+      }
+      keys[key] = true;
     }
   });
   document.addEventListener("keyup", e => {
     if (awaitingNameEntry) return;
-    keys[e.key] = false;
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    keys[key] = false;
   });
 
   let enemies = [];
@@ -713,7 +737,16 @@
 
   function drawHealth() {
     ctx.fillStyle = "black";
-    drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
+    if (twoPlayerMode) {
+      drawSpriteText(
+        `P1 ${health} P2 ${health2}`,
+        canvas.width - 10,
+        10,
+        "right"
+      );
+    } else {
+      drawSpriteText("HEALTH " + health, canvas.width - 10, 10, "right");
+    }
   }
 
   function drawSlider(slider, label) {
@@ -935,6 +968,7 @@
   function initGame() {
     score = 0;
     health = 3;
+    health2 = 3;
     gameOver = false;
     enemies = [];
     spawnTimer = 0;
@@ -952,6 +986,17 @@
     player.attackTimer = 0;
     player.cooldown = 0;
     player.touchingLeft = false;
+    if (twoPlayerMode) {
+      player2.x = 100;
+      player2.y = groundY;
+      player2.vx = 0;
+      player2.vy = 0;
+      player2.jumping = false;
+      player2.attacking = false;
+      player2.attackTimer = 0;
+      player2.cooldown = 0;
+      player2.touchingLeft = false;
+    }
     initTerrain();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     lastFrameTime = performance.now();
@@ -1068,18 +1113,39 @@
         player.vx = -PLAYER_SPEED;
       } else if (keys["ArrowRight"]) {
         player.vx = PLAYER_SPEED;
+      } else if (!twoPlayerMode && (keys["a"] || keys["q"])) {
+        player.vx = -PLAYER_SPEED;
+      } else if (!twoPlayerMode && keys["d"]) {
+        player.vx = PLAYER_SPEED;
       } else {
         player.vx = 0;
       }
 
-      if (keys["ArrowUp"] && !player.jumping) {
+      if ((keys["ArrowUp"] || (!twoPlayerMode && (keys["w"] || keys["z"]))) && !player.jumping) {
         player.vy = -10;
         player.jumping = true;
         playJumpSound();
       }
+
+      if (twoPlayerMode) {
+        if (keys["a"] || keys["q"]) {
+          player2.vx = -PLAYER_SPEED;
+        } else if (keys["d"]) {
+          player2.vx = PLAYER_SPEED;
+        } else {
+          player2.vx = 0;
+        }
+
+        if ((keys["w"] || keys["z"]) && !player2.jumping) {
+          player2.vy = -10;
+          player2.jumping = true;
+          playJumpSound();
+        }
+      }
     }
 
     player.update();
+    if (twoPlayerMode) player2.update();
     enemies.forEach(e => {
       e.x += worldSpeed;
       e.update();
@@ -1126,6 +1192,35 @@
           }
         }
       }
+      if (twoPlayerMode) {
+        const p2Box = {
+          x: player2.x,
+          y: player2.y,
+          width: FRAME_WIDTH - SPRITE_PADDING * 3,
+          height: FRAME_HEIGHT - SPRITE_PADDING * 3,
+        };
+        if (rectsOverlap(p2Box, enemyBox)) {
+          const side2 = collisionSide(p2Box, enemyBox);
+          if (e.state === "walk") {
+            const stomp2 = side2 === "top" && player2.vy > 0;
+            if (player2.attacking || stomp2) {
+              e.state = "hit";
+              playEnemyKillSound();
+              score += 1;
+              enemyKillCount++;
+              if (enemyKillCount % 3 === 0) {
+                healthPacks.push(new HealthPack(e.x, e.y));
+              }
+              if (stomp2) {
+                player2.vy = -10;
+                player2.jumping = true;
+              }
+            } else if (side2 !== "top" && !player2.attacking && !player2.invincible) {
+              player2.hit();
+            }
+          }
+        }
+      }
     });
 
     spawnTimer++;
@@ -1137,6 +1232,7 @@
     }
 
     player.draw();
+    if (twoPlayerMode) player2.draw();
     enemies.forEach(e => e.draw());
     healthPacks.forEach(hp => hp.update());
     healthPacks.forEach(hp => hp.draw());
@@ -1147,12 +1243,6 @@
     // Update and filter health packs
     const now = Date.now();
     healthPacks = healthPacks.filter(hp => {
-      const playerBox = {
-        x: player.x,
-        y: player.y,
-        width: player.width,
-        height: player.height,
-      };
       const packBox = {
         x: hp.x - hp.radius,
         y: hp.y - hp.radius,
@@ -1160,13 +1250,33 @@
         height: hp.radius * 2,
       };
 
-      if (rectsOverlap(playerBox, packBox)) {
+      const p1Box = {
+        x: player.x,
+        y: player.y,
+        width: player.width,
+        height: player.height,
+      };
+      if (rectsOverlap(p1Box, packBox)) {
         health++;
         playHealthPackSound();
-        return false; // Remove pack
+        return false;
       }
 
-      return now - hp.createdAt < 500; // Keep pack if less than 0.5s old
+      if (twoPlayerMode) {
+        const p2Box = {
+          x: player2.x,
+          y: player2.y,
+          width: player2.width,
+          height: player2.height,
+        };
+        if (rectsOverlap(p2Box, packBox)) {
+          health2++;
+          playHealthPackSound();
+          return false;
+        }
+      }
+
+      return now - hp.createdAt < 500;
     });
 
     drawScore();
@@ -1369,6 +1479,8 @@
   Game.qualifiesForHighScore = qualifiesForHighScore;
   Game.loadHighScores = loadHighScores;
   Game.saveHighScores = saveHighScores;
+  Game.setTwoPlayerMode = v => { twoPlayerMode = v; };
+  Game.getTwoPlayerMode = () => twoPlayerMode;
   // Testing helpers
   Game._getHealthForTest = () => health;
   Game._setHealthForTest = (v) => { health = v; };

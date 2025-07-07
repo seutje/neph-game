@@ -15,6 +15,7 @@ This repository contains a small browser-based platform game.
    - **Up Arrow** – Jump over gaps or onto enemies.
    - **Space** – Attack with your weapon.
    - **Down Arrow** – Hold to block incoming hits.
+   - **WASD/ZQSD + Ctrl** – Second player controls when two-player mode is enabled. In single player these are alternate keys for player one.
   - **P** – Pause or resume the action. When paused you can click the on-screen restart button to start over.
 5. Defeat enemies and collect health packs to increase your score and survive as long as possible. When you fall or your health reaches zero the game ends. Save your name to the high score table if you qualify.
 
