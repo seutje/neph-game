@@ -491,7 +491,7 @@
     },
     hit() {
       if (!this.invincible && !this.blocking) {
-        health--;
+        health = Math.max(0, health - 1);
         const willDie = health < 1;
         if (!willDie) {
           this.invincible = true;
@@ -1301,6 +1301,10 @@
   Game.qualifiesForHighScore = qualifiesForHighScore;
   Game.loadHighScores = loadHighScores;
   Game.saveHighScores = saveHighScores;
+  // Testing helpers
+  Game._getHealthForTest = () => health;
+  Game._setHealthForTest = (v) => { health = v; };
+  Game._hitPlayerForTest = () => player.hit();
 
   window.Game = Game;
 
