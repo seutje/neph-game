@@ -294,6 +294,9 @@
     }
   }
 
+  const MAX_FPS = 60;
+  const FRAME_DURATION = 1000 / MAX_FPS;
+  let lastFrameTime = performance.now();
   let frameCount = 0;
   let gameStartTime = Date.now();
   let totalPausedTime = 0;
@@ -902,6 +905,7 @@
     player.touchingLeft = false;
     initTerrain();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    lastFrameTime = performance.now();
     gameLoop();
   }
 
@@ -985,6 +989,13 @@
   }
 
   function gameLoop() {
+    const currentTime = performance.now();
+    const delta = currentTime - lastFrameTime;
+    if (delta < FRAME_DURATION) {
+      animationId = requestAnimationFrame(gameLoop);
+      return;
+    }
+    lastFrameTime = currentTime;
     frameCount++;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     updateClouds();
