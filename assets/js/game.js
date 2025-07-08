@@ -1066,11 +1066,11 @@
     selectedCharacter1 = character;
     selectedCharacter2 = character2;
     twoPlayerMode = twoPlayerSelected;
-    const spritePath = `assets/images/sprite-${character.toLowerCase()}.png`;
+    const spritePath = `assets/images/sprite-${character.toLowerCase()}.png?v=1.0`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
     if (twoPlayerMode) {
-      const spritePath2 = `assets/images/sprite-${character2.toLowerCase()}.png`;
+      const spritePath2 = `assets/images/sprite-${character2.toLowerCase()}.png?v=1.0`;
       sprite2.src = spritePath2;
     }
     characterSelectionVisible = false;
@@ -1099,7 +1099,7 @@
     if (!demoPreserve) {
       selectedCharacter1 = randomCharacter;
     }
-    const spritePath = `assets/images/sprite-${randomCharacter.toLowerCase()}.png`;
+    const spritePath = `assets/images/sprite-${randomCharacter.toLowerCase()}.png?v=1.0`;
     const alreadyLoaded = sprite.complete && sprite.src.endsWith(spritePath);
     sprite.src = spritePath;
     Game.autoplaying = true;
@@ -1552,7 +1552,7 @@
     const total = characters.length + 3;
     for (const char of characters) {
       const img = new Image();
-      img.src = `assets/images/sprite-${char.toLowerCase()}.png`;
+      img.src = `assets/images/sprite-${char.toLowerCase()}.png?v=1.0`;
       img.onload = () => {
         loaded++;
         if (loaded === total) {
@@ -1561,21 +1561,21 @@
       };
       spriteCache[char.toLowerCase()] = img;
     }
-    alphabetSprite.src = "assets/images/sprite-alphabet.png";
+    alphabetSprite.src = "assets/images/sprite-alphabet.png?v=1.0";
     alphabetSprite.onload = () => {
       loaded++;
       if (loaded === total) {
         showCharacterSelection(1);
       }
     };
-    numbersSprite.src = "assets/images/sprite-numbers.png";
+    numbersSprite.src = "assets/images/sprite-numbers.png?v=1.0";
     numbersSprite.onload = () => {
       loaded++;
       if (loaded === total) {
         showCharacterSelection(1);
       }
     };
-    heartSprite.src = "assets/images/sprite-heart.png";
+    heartSprite.src = "assets/images/sprite-heart.png?v=1.0";
     heartSprite.onload = () => {
       loaded++;
       if (loaded === total) {
