@@ -944,10 +944,13 @@
   function drawGround() {
     ctx.fillStyle = "green";
     terrainBlocks.forEach(block => {
-      ctx.fillRect(block.x, block.y, TERRAIN_BLOCK_WIDTH, canvas.height - block.y);
+      const x = Math.round(block.x);
+      ctx.fillRect(x, block.y, TERRAIN_BLOCK_WIDTH, canvas.height - block.y);
     });
     gaps.forEach(gap => {
-      ctx.clearRect(gap.x, groundY, gap.width, canvas.height - groundY);
+      const x = Math.round(gap.x);
+      const width = Math.round(gap.width);
+      ctx.clearRect(x, groundY, width, canvas.height - groundY);
     });
   }
 
