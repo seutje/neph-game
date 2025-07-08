@@ -144,6 +144,8 @@
   let terrainCursor = 0;
   const GAP_CHANCE = 0.20;
   const MAX_GAP_WIDTH = 100;
+  const MIN_GROUND_WIDTH = 100;
+  const MAX_GROUND_WIDTH = 200;
   const clouds = [
     { x: 100, y: 60 },
     { x: 300, y: 80 },
@@ -923,7 +925,7 @@
         gaps.push({ x: terrainCursor, width });
         terrainCursor += width;
       } else {
-        const groundWidth = 50 + Math.random() * 150;
+        const groundWidth = MIN_GROUND_WIDTH + Math.random() * (MAX_GROUND_WIDTH - MIN_GROUND_WIDTH);
         terrainCursor += groundWidth;
       }
     }
@@ -944,10 +946,14 @@
   function drawGround() {
     ctx.fillStyle = "green";
     terrainBlocks.forEach(block => {
-      ctx.fillRect(block.x, block.y, TERRAIN_BLOCK_WIDTH, canvas.height - block.y);
+      const x = Math.round(block.x);
+      ctx.fillRect(x, block.y, TERRAIN_BLOCK_WIDTH, canvas.height - block.y);
     });
     gaps.forEach(gap => {
-      ctx.clearRect(gap.x, groundY, gap.width, canvas.height - groundY);
+      const start = Math.round(gap.x);
+      const end = Math.round(gap.x + gap.width);
+      const width = end - start;
+      ctx.clearRect(start, groundY, width, canvas.height - groundY);
     });
   }
 
