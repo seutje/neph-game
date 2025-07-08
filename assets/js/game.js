@@ -678,6 +678,8 @@
     const btnX = (canvas.width - btnWidth) / 2;
     const btnY = inputY + inputHeight + 10;
     const textY = btnY + (btnHeight - DRAW_CHAR_HEIGHT) / 2;
+    ctx.fillStyle = "white";
+    ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
     drawSpriteText("SAVE SCORE", btnX + btnWidth / 2, textY, "center");
     ctx.strokeStyle = "white";
     ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
@@ -697,6 +699,8 @@
     const btnX = (canvas.width - CHAR_BTN_WIDTH) / 2;
     const btnY = canvas.height - CHAR_BTN_HEIGHT - 10;
     const textY = btnY + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT) / 2;
+    ctx.fillStyle = "white";
+    ctx.fillRect(btnX, btnY, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
     drawSpriteText("RESTART", btnX + CHAR_BTN_WIDTH / 2, textY, "center");
     ctx.strokeStyle = "white";
     ctx.strokeRect(btnX, btnY, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
@@ -742,11 +746,20 @@
     drawSpriteText(title, canvas.width / 2, 40, "center");
 
     characterButtonRects.forEach(({ name, x, y, width, height }) => {
+      ctx.fillStyle = "white";
+      ctx.fillRect(x, y, width, height);
       ctx.strokeStyle = "black";
       ctx.strokeRect(x, y, width, height);
       const textY = y + (height - DRAW_CHAR_HEIGHT * CHAR_BTN_TEXT_SCALE) / 2;
       drawSpriteText(name, x + width / 2, textY, "center", CHAR_BTN_TEXT_SCALE);
     });
+    ctx.fillStyle = "white";
+    ctx.fillRect(
+      twoPlayerButtonRect.x,
+      twoPlayerButtonRect.y,
+      twoPlayerButtonRect.width,
+      twoPlayerButtonRect.height
+    );
     ctx.strokeStyle = "black";
     ctx.strokeRect(
       twoPlayerButtonRect.x,
@@ -784,6 +797,8 @@
     const btnX = (canvas.width - CHAR_BTN_WIDTH) / 2;
     const btnY = canvas.height - CHAR_BTN_HEIGHT - 10;
     const textY = btnY + (CHAR_BTN_HEIGHT - DRAW_CHAR_HEIGHT) / 2;
+    ctx.fillStyle = "white";
+    ctx.fillRect(btnX, btnY, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
     drawSpriteText("RESTART", btnX + CHAR_BTN_WIDTH / 2, textY, "center");
     ctx.strokeStyle = "black";
     ctx.strokeRect(btnX, btnY, CHAR_BTN_WIDTH, CHAR_BTN_HEIGHT);
