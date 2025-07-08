@@ -896,6 +896,11 @@
     ctx.globalAlpha = 0.5;
     ctx.fillStyle = "green";
     bushes.forEach(b => {
+      // skip drawing if the bush overlaps a gap
+      const gap = gaps.find(g =>
+        b.x + BUSH_WIDTH / 2 > g.x && b.x - BUSH_WIDTH / 2 < g.x + g.width
+      );
+      if (gap) return;
       const bx = b.x - BUSH_WIDTH / 2;
       const by = GROUND_SURFACE_Y - BUSH_HEIGHT;
       ctx.fillRect(bx, by, BUSH_WIDTH, BUSH_HEIGHT);
